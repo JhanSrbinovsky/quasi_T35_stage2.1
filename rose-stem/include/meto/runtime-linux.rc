@@ -1,0 +1,36 @@
+###############################################################################
+## Families for Met Office Linux systems
+###############################################################################
+# Family for Met Office Linux jobs
+    [[METO_LINUX]]
+        inherit = None, LINUX
+        environment scripting = ". /usr/local/bin/prg_ifort-12.0 ; ulimit -s unlimited"
+        [[[environment]]]
+            PATH = /home/h01/frum/mpi/mpich2-1.4.1/ifort-12.0/bin:$PATH
+            
+# Family for Linux build jobs
+    [[METO_LINUX_BUILD]]
+        inherit = None, EXTRACT_AND_BUILD, METO_LINUX
+        [[[environment]]]
+            ROSE_TASK_N_JOBS = 4
+
+# Family for Met Office Linux compute jobs
+    [[METO_LINUX_COMPUTE]]
+        inherit = None, METO_LINUX, COMPUTE
+        [[[environment]]]
+            LOOBOS_INSTALL_DIR = /project/jules/rose-stem/loobos-data
+            GSWP2_INSTALL_DIR = /project/jules/benchmarking/data/gswp2
+        [[[job submission]]]
+            method = slurm
+        [[[directives]]]
+            --time = 00:10:00
+            
+# Family for Met Office Linux comparison jobs
+    [[METO_LINUX_NETCDF_COMPARISON]]
+        inherit = None, METO_LINUX, NETCDF_COMPARISON
+        [[[environment]]]
+            KGO_DIR = /project/jules/rose-stem/jules-kgo/{{ KGO_VERSION }}
+        [[[job submission]]]
+            method = slurm
+        [[[directives]]]
+            --time = 00:05:00

@@ -1,0 +1,419 @@
+###############################################################################
+## Build jobs
+###############################################################################
+    [[VM_BUILD]]
+        inherit = None, EXTRACT_AND_BUILD, LINUX
+        [[[environment]]]
+            ROSE_TASK_N_JOBS = 2
+            JULES_PLATFORM = vm
+
+    [[fcm_make_debug]]
+        inherit = VM_BUILD
+        [[[environment]]]
+            JULES_BUILD = debug
+            JULES_OMP = noomp
+            
+    [[fcm_make_omp]]
+        inherit = VM_BUILD
+        [[[environment]]]
+            JULES_BUILD = normal
+            JULES_OMP = omp
+            
+###############################################################################
+## Install jobs
+###############################################################################
+    [[install_loobos_data]]
+        inherit = None, LINUX
+        command scripting = """
+fcm export --force fcm:jules_doc.x_tr/loobos/Loobos_1997.dat
+fcm export --force fcm:jules_doc.x_tr/loobos/Loobos_1997_day.dat
+"""
+
+###############################################################################
+## Compute jobs
+###############################################################################
+    [[VM_COMPUTE]]
+        inherit = None, LINUX, COMPUTE
+        [[[remote]]]
+            host = {{ ROSE_ORIG_HOST }}
+        [[[environment]]]
+            LOOBOS_INSTALL_DIR = ../install_loobos_data
+            GSWP2_INSTALL_DIR = /jules/benchmarking-data/gswp2
+            
+    [[VM_LOOBOS]]
+        inherit = None, VM_COMPUTE
+        [[[environment]]]
+            BUILD_NAME = fcm_make_debug
+            MPI_NUM_TASKS = 1
+            OMP_NUM_THREADS = 1
+            NPROC = $MPI_NUM_TASKS
+
+    [[loobos_gl4]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_euro4]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_forecast]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_ukv]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_esm_spinup]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_esm]]
+        inherit = LOOBOS, VM_LOOBOS
+        [[[environment]]]
+            DUMP_FILE = ../loobos_esm_spinup/output/loobos_esm_spinup.dump.19971231.82800.nc
+
+    [[loobos_julesc_spinup]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_julesc]]
+        inherit = LOOBOS, VM_LOOBOS
+        [[[environment]]]
+            DUMP_FILE = ../loobos_julesc_spinup/output/loobos_julesc_spinup.dump.19971231.82800.nc
+
+    [[loobos_jules_cn_spinup]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_jules_cn]]
+        inherit = LOOBOS, VM_LOOBOS
+        [[[environment]]]
+            DUMP_FILE = ../loobos_jules_cn_spinup/output/loobos_jules_cn_spinup.dump.19971231.82800.nc
+
+    [[loobos_crops]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_irrig]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_fire_spinup]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_fire]]
+        inherit = LOOBOS, VM_LOOBOS
+        [[[environment]]]
+            DUMP_FILE = ../loobos_fire_spinup/output/loobos_fire_spinup.dump.19971231.82800.nc
+
+    [[loobos_daily_disagg]]
+        inherit = LOOBOS, VM_LOOBOS
+            
+    [[loobos_crm1_traitF]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_crm2_traitF]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_crm3_traitF]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_crm4_traitF]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_crm5_traitF]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_crm6_traitF]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_crm6_traitT]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[loobos_crm6_traitF_srfT]]
+        inherit = LOOBOS, VM_LOOBOS
+
+    [[VM_GSWP2]]
+        inherit = None, VM_COMPUTE
+        pre-command scripting = gen_gswp2_drive_file
+        [[[environment]]]
+            BUILD_NAME = fcm_make_omp
+            MPI_NUM_TASKS = 1
+            OMP_NUM_THREADS = 2
+            NPROC = $MPI_NUM_TASKS
+
+    [[gswp2_rivers]]
+        inherit = GSWP2, VM_GSWP2
+
+    [[gswp2_trip]]
+        inherit = GSWP2, VM_GSWP2
+
+    [[gswp2_trip_spinup]]
+        inherit = GSWP2, VM_GSWP2
+
+    [[gswp2_trip_restart]]
+        inherit = GSWP2, VM_GSWP2
+        [[[environment]]]
+            DUMP_FILE = ../gswp2_trip_spinup/output/gswp2_trip_spinup.dump.19820701.10800.nc
+            
+    [[gswp2_closures]]
+        inherit = GSWP2, VM_GSWP2
+            
+###############################################################################
+## Comparison jobs
+###############################################################################
+    [[VM_NETCDF_COMPARISON]]
+        inherit = None, LINUX, NETCDF_COMPARISON
+        [[[environment]]]
+            KGO_DIR = /jules/rose-stem-kgo/{{ KGO_VERSION }}
+            
+    [[nccmp_loobos_gl4]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_gl4/output
+
+    [[nccmp_loobos_euro4]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_euro4/output
+
+    [[nccmp_loobos_forecast]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_forecast/output
+
+    [[nccmp_loobos_ukv]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_ukv/output
+
+    [[nccmp_loobos_esm]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_esm/output
+
+    [[nccmp_loobos_julesc]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_julesc/output
+
+    [[nccmp_loobos_jules_cn]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_jules_cn/output
+            
+    [[nccmp_loobos_fire]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_fire/output
+
+    [[nccmp_loobos_crops]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crops/output
+
+    [[nccmp_loobos_irrig]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_irrig/output
+
+    [[nccmp_loobos_daily_disagg]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_daily_disagg/output
+            
+    [[nccmp_loobos_crm1_traitF]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crm1_traitF/output
+
+    [[nccmp_loobos_crm2_traitF]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crm2_traitF/output
+
+    [[nccmp_loobos_crm3_traitF]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crm3_traitF/output
+
+    [[nccmp_loobos_crm4_traitF]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crm4_traitF/output
+
+    [[nccmp_loobos_crm5_traitF]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crm5_traitF/output
+
+    [[nccmp_loobos_crm6_traitF]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crm6_traitF/output
+
+    [[nccmp_loobos_crm6_traitT]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crm6_traitT/output
+
+    [[nccmp_loobos_crm6_traitF_srfT]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../loobos_crm6_traitF_srfT/output
+
+    [[nccmp_gswp2_rivers]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../gswp2_rivers/output
+
+    [[nccmp_gswp2_trip]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../gswp2_trip/output
+
+    [[nccmp_gswp2_trip_restart]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../gswp2_trip_restart/output
+
+    [[nccmp_gswp2_closures]]
+        inherit = KGO_CHECK, VM_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../gswp2_closures/output
+
+###############################################################################
+## Housekeeping jobs
+###############################################################################
+    [[housekeep_loobos_gl4]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_gl4
+
+    [[housekeep_loobos_euro4]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_euro4
+
+    [[housekeep_loobos_forecast]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+           DIR1 = ../loobos_forecast
+
+    [[housekeep_loobos_ukv]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_ukv
+
+    [[housekeep_loobos_esm_spinup]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_esm_spinup
+
+    [[housekeep_loobos_esm]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_esm
+
+    [[housekeep_loobos_julesc_spinup]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_julesc_spinup
+
+    [[housekeep_loobos_julesc]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_julesc
+
+    [[housekeep_loobos_jules_cn_spinup]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_jules_cn_spinup
+
+    [[housekeep_loobos_jules_cn]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_jules_cn
+
+    [[housekeep_loobos_crops]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crops
+       
+    [[housekeep_loobos_irrig]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_irrig
+       
+    [[housekeep_loobos_fire_spinup]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_fire_spinup
+
+    [[housekeep_loobos_fire]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_fire
+
+    [[housekeep_loobos_daily_disagg]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_daily_disagg
+            
+    [[housekeeping_loobos_crm1_traitF]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crm1_traitF
+
+    [[housekeeping_loobos_crm2_traitF]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crm2_traitF
+
+    [[housekeeping_loobos_crm3_traitF]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crm3_traitF
+
+    [[housekeeping_loobos_crm4_traitF]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crm4_traitF
+
+    [[housekeeping_loobos_crm5_traitF]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crm5_traitF
+
+    [[housekeeping_loobos_crm6_traitF]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crm6_traitF
+
+    [[housekeeping_loobos_crm6_traitT]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crm6_traitT
+
+    [[housekeeping_loobos_crm6_traitF_srfT]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../loobos_crm6_traitF_srfT
+
+    [[housekeep_gswp2_rivers]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../gswp2_rivers
+
+    [[housekeep_gswp2_trip]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../gswp2_trip
+
+    [[housekeep_gswp2_trip_spinup]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../gswp2_trip_spinup
+               
+
+    [[housekeep_gswp2_trip_restart]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../gswp2_trip_restart
+	       
+    [[housekeep_gswp2_closures]]
+        inherit = HOUSEKEEPING, LINUX
+        [[[environment]]]
+            DIR1 = ../gswp2_closures

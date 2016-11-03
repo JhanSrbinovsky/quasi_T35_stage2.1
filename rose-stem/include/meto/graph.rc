@@ -1,0 +1,42 @@
+###############################################################################
+## Imports
+###############################################################################
+%include 'include/meto/graph-linux-intel.rc'
+%include 'include/meto/graph-linux-gfortran.rc'
+%include 'include/meto/graph-xc40-cce.rc'
+
+###############################################################################
+## Name graphs
+###############################################################################
+{%- set name_graphs = {} %}
+{%- do name_graphs.update(name_graphs_linux_intel.items()) %}
+{%- do name_graphs.update(name_graphs_linux_gfortran.items()) %}
+{%- do name_graphs.update(name_graphs_xc40_cce.items()) %}
+
+
+###############################################################################
+## Group definitions
+###############################################################################
+{%- set groups = {
+        "all" : ["linux", "xc40"],
+        
+        "loobos" : ["linux_loobos", "xc40_loobos"],
+        
+        "gswp2" : ["linux_gswp2", "xc40_gswp2"],
+        
+        "linux" : ["linux_intel", "linux_gfortran"],
+        
+        "linux_loobos" : ["linux_intel_loobos", "linux_gfortran_loobos"],
+        
+        "linux_gswp2" : ["linux_intel_gswp2", "linux_gfortran_gswp2"],
+        
+        "xc40" : ["xc40_cce"],
+        
+        "xc40_loobos" : ["xc40_cce_loobos"],
+                                
+        "xc40_gswp2" : ["xc40_cce_gswp2"],
+    }
+%}
+{%- do groups.update(groups_linux_intel.items()) %}
+{%- do groups.update(groups_linux_gfortran.items()) %}
+{%- do groups.update(groups_xc40_cce.items()) %}

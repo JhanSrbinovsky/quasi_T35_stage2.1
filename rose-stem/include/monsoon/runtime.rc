@@ -1,0 +1,2 @@
+# Include XC40 definitions
+%include 'include/monsoon/runtime-xc40-cce.rc'

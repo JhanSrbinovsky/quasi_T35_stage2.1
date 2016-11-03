@@ -1,0 +1,177 @@
+###############################################################################
+## Name graphs
+###############################################################################
+{%- if COVERAGE == true %}
+    # If coverage stats are requested, all Intel runs must use the same build in order for the
+    # profiling stats to be generated and aggregated correctly
+    {%- set loobos_build   = "fcm_make_meto_linux_intel_coverage" %}
+    {%- set rivers_build   = "fcm_make_meto_linux_intel_coverage" %}
+    {%- set closures_build = "fcm_make_meto_linux_intel_coverage" %}
+{%- else %}
+    {%- set loobos_build   = "fcm_make_meto_linux_intel_debug_noomp_nompi" %}
+    {%- set rivers_build   = "fcm_make_meto_linux_intel_noomp_mpi" %}
+    {%- set closures_build = "fcm_make_meto_linux_intel_noomp_mpi" %}
+{%- endif %}
+
+{%- set name_graphs_linux_intel = {
+        "meto_linux_intel_loobos_gl4" : loobos_build + " =>                             \
+                                         meto_linux_intel_loobos_gl4 =>                 \
+                                         nccmp_meto_linux_intel_loobos_gl4 =>           \
+                                         housekeep_meto_linux_intel_loobos_gl4",
+
+        "meto_linux_intel_loobos_euro4" : loobos_build + " =>                             \
+                                           meto_linux_intel_loobos_euro4 =>               \
+                                           nccmp_meto_linux_intel_loobos_euro4 =>         \
+                                           housekeep_meto_linux_intel_loobos_euro4",
+       
+        "meto_linux_intel_loobos_forecast" : loobos_build + " =>                             \
+                                              meto_linux_intel_loobos_forecast =>            \
+                                              nccmp_meto_linux_intel_loobos_forecast =>      \
+                                              housekeep_meto_linux_intel_loobos_forecast",
+       
+        "meto_linux_intel_loobos_ukv" : loobos_build + " =>                             \
+                                         meto_linux_intel_loobos_ukv =>                 \
+                                         nccmp_meto_linux_intel_loobos_ukv =>           \
+                                         housekeep_meto_linux_intel_loobos_ukv",
+       
+        "meto_linux_intel_loobos_esm" : loobos_build + " =>                                                   \
+                                         meto_linux_intel_loobos_esm_spinup => meto_linux_intel_loobos_esm => \
+                                         nccmp_meto_linux_intel_loobos_esm =>                                 \
+                                         housekeep_meto_linux_intel_loobos_esm_spinup & housekeep_meto_linux_intel_loobos_esm",
+
+        "meto_linux_intel_loobos_julesc" : loobos_build + " =>                                                                 \
+                                            meto_linux_intel_loobos_julesc_spinup => meto_linux_intel_loobos_julesc            \
+                                            & meto_linux_intel_loobos_jules_c1p1 =>                                            \
+                                            nccmp_meto_linux_intel_loobos_julesc & nccmp_meto_linux_intel_loobos_jules_c1p1 => \
+                                            housekeep_meto_linux_intel_loobos_julesc_spinup & housekeep_meto_linux_intel_loobos_julesc  \
+                                            & housekeep_meto_linux_intel_loobos_jules_c1p1",
+
+        "meto_linux_intel_loobos_jules_cn" : loobos_build + " =>                                                         \
+                                            meto_linux_intel_loobos_jules_cn_spinup => meto_linux_intel_loobos_jules_cn => \
+                                            nccmp_meto_linux_intel_loobos_jules_cn =>                                    \
+                                            housekeep_meto_linux_intel_loobos_jules_cn_spinup & housekeep_meto_linux_intel_loobos_jules_cn",
+
+        "meto_linux_intel_loobos_crops" : loobos_build + " =>                             \
+                                           meto_linux_intel_loobos_crops =>               \
+                                           nccmp_meto_linux_intel_loobos_crops =>         \
+                                           housekeep_meto_linux_intel_loobos_crops",
+
+        "meto_linux_intel_loobos_irrig" : loobos_build + " =>                             \
+                                           meto_linux_intel_loobos_irrig =>               \
+                                           nccmp_meto_linux_intel_loobos_irrig =>         \
+                                           housekeep_meto_linux_intel_loobos_irrig",
+
+        "meto_linux_intel_loobos_fire" : loobos_build + " =>                                                     \
+                                          meto_linux_intel_loobos_fire_spinup => meto_linux_intel_loobos_fire => \
+                                          nccmp_meto_linux_intel_loobos_fire =>                                  \
+                                          housekeep_meto_linux_intel_loobos_fire_spinup & housekeep_meto_linux_intel_loobos_fire",
+       
+        "meto_linux_intel_loobos_daily_disagg" : loobos_build + " =>                              \
+                                                  meto_linux_intel_loobos_daily_disagg =>         \
+                                                  nccmp_meto_linux_intel_loobos_daily_disagg =>   \
+                                                  housekeep_meto_linux_intel_loobos_daily_disagg",
+
+        "meto_linux_intel_loobos_crm1_traitF" : loobos_build + " =>                             \
+                                                 meto_linux_intel_loobos_crm1_traitF => \
+                                                 nccmp_meto_linux_intel_loobos_crm1_traitF => \
+                                                 housekeeping_meto_linux_intel_loobos_crm1_traitF",
+ 
+        "meto_linux_intel_loobos_crm2_traitF" : loobos_build + " =>                             \
+                                                 meto_linux_intel_loobos_crm2_traitF => \
+                                                 nccmp_meto_linux_intel_loobos_crm2_traitF => \
+                                                 housekeeping_meto_linux_intel_loobos_crm2_traitF",
+ 
+        "meto_linux_intel_loobos_crm3_traitF" : loobos_build + " =>                             \
+                                                 meto_linux_intel_loobos_crm3_traitF => \
+                                                 nccmp_meto_linux_intel_loobos_crm3_traitF => \
+                                                 housekeeping_meto_linux_intel_loobos_crm3_traitF",
+ 
+        "meto_linux_intel_loobos_crm4_traitF" : loobos_build + " =>                             \
+                                                 meto_linux_intel_loobos_crm4_traitF => \
+                                                 nccmp_meto_linux_intel_loobos_crm4_traitF => \
+                                                 housekeeping_meto_linux_intel_loobos_crm4_traitF",
+ 
+        "meto_linux_intel_loobos_crm5_traitF" : loobos_build + " =>                             \
+                                                 meto_linux_intel_loobos_crm5_traitF => \
+                                                 nccmp_meto_linux_intel_loobos_crm5_traitF => \
+                                                 housekeeping_meto_linux_intel_loobos_crm5_traitF",
+ 
+        "meto_linux_intel_loobos_crm6_traitF" : loobos_build + " =>                             \
+                                                 meto_linux_intel_loobos_crm6_traitF => \
+                                                 nccmp_meto_linux_intel_loobos_crm6_traitF => \
+                                                 housekeeping_meto_linux_intel_loobos_crm6_traitF",
+ 
+        "meto_linux_intel_loobos_crm6_traitT" : loobos_build + " =>                             \
+                                                 meto_linux_intel_loobos_crm6_traitT => \
+                                                 nccmp_meto_linux_intel_loobos_crm6_traitT => \
+                                                 housekeeping_meto_linux_intel_loobos_crm6_traitT",
+ 
+        "meto_linux_intel_loobos_crm6_traitF_srfT" : loobos_build + " =>                             \
+                                                      meto_linux_intel_loobos_crm6_traitF_srfT => \
+                                                      nccmp_meto_linux_intel_loobos_crm6_traitF_srfT => \
+                                                      housekeeping_meto_linux_intel_loobos_crm6_traitF_srfT",
+       
+        "meto_linux_intel_gswp2_rivers" : rivers_build + " =>                     \
+                                           meto_linux_intel_gswp2_rivers =>       \
+                                           nccmp_meto_linux_intel_gswp2_rivers => \
+                                           housekeep_meto_linux_intel_gswp2_rivers",
+
+        "meto_linux_intel_gswp2_trip" : rivers_build + " => \
+                                           meto_linux_intel_gswp2_trip =>       \
+                                           nccmp_meto_linux_intel_gswp2_trip => \
+                                           housekeep_meto_linux_intel_gswp2_trip",
+       
+        "meto_linux_intel_gswp2_trip_restart" : rivers_build + " => \
+                                           meto_linux_intel_gswp2_trip_spinup => meto_linux_intel_gswp2_trip_restart =>       \
+                                           nccmp_meto_linux_intel_gswp2_trip_restart => \
+                                           housekeep_meto_linux_intel_gswp2_trip_spinup => housekeep_meto_linux_intel_gswp2_trip_restart",
+
+
+
+
+        "meto_linux_intel_gswp2_closures" : closures_build + " =>                     \
+                                             meto_linux_intel_gswp2_closures =>       \
+                                             nccmp_meto_linux_intel_gswp2_closures => \
+                                             housekeep_meto_linux_intel_gswp2_closures",
+    }
+%}
+
+# If coverage stats are requested, make sure the coverage generation will be run
+{%- if COVERAGE == true %}
+    # Add the coverage graph to name_graphs
+    {%- do name_graphs_linux_intel.update({
+            "meto_linux_intel_coverage" : "METO_LINUX_INTEL_LOOBOS:succeed-all & METO_LINUX_INTEL_GSWP2:succeed-all => coverage_summary"
+        })
+    %}
+
+    # Add the coverage group to RUN_NAMES
+    {%- do RUN_NAMES.append("meto_linux_intel_coverage") %}
+{%- endif %}
+
+
+###############################################################################
+## Group definitions
+###############################################################################
+{%- set groups_linux_intel = {
+        "linux_intel" : ["linux_intel_loobos", "linux_intel_gswp2"],
+        
+        "linux_intel_loobos" : ["meto_linux_intel_loobos_gl4", "meto_linux_intel_loobos_euro4",
+                                "meto_linux_intel_loobos_forecast", "meto_linux_intel_loobos_ukv",
+                                "meto_linux_intel_loobos_esm", "meto_linux_intel_loobos_crops",
+                                "meto_linux_intel_loobos_fire", "meto_linux_intel_loobos_daily_disagg",
+                                "meto_linux_intel_loobos_julesc", "meto_linux_intel_loobos_irrig",
+                                "meto_linux_intel_loobos_jules_cn",
+                                "meto_linux_intel_loobos_crm1_traitF",
+                                "meto_linux_intel_loobos_crm2_traitF",
+                                "meto_linux_intel_loobos_crm3_traitF",
+                                "meto_linux_intel_loobos_crm4_traitF",
+                                "meto_linux_intel_loobos_crm5_traitF",
+                                "meto_linux_intel_loobos_crm6_traitF",
+                                "meto_linux_intel_loobos_crm6_traitT",
+                                "meto_linux_intel_loobos_crm6_traitF_srfT"],
+                                
+        "linux_intel_gswp2" : ["meto_linux_intel_gswp2_rivers", 
+                               "meto_linux_intel_gswp2_trip", "meto_linux_intel_gswp2_trip_restart",
+                               "meto_linux_intel_gswp2_closures"],
+    }
+%}

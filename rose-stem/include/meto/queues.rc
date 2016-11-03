@@ -1,0 +1,9 @@
+# We want to make sure that the resource consuming jobs don't hog hosts
+# So we only have queues for build and GSWP2 jobs on Linux
+# Loobos, comparison and housekeeping jobs are not resource hungy, so we don't limit them
+# On the Cray, we assume PBS is doing a good job of managing resources
+    [[queues]]
+# No more than 2 Linux build jobs at once (since these run on localhost)
+        [[[linux_build]]]
+            limit = 2
+            members = METO_LINUX_BUILD

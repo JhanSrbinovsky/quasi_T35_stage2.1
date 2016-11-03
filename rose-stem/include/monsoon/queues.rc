@@ -1,0 +1,3 @@
+# We want to make sure that the resource consuming jobs don't hog hosts
+# On the Cray, we assume PBS is doing a good job of managing resources
+    [[queues]]

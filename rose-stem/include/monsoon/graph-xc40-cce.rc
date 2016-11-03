@@ -1,0 +1,143 @@
+###############################################################################
+## Name graphs
+###############################################################################
+{%- set name_graphs_xc40_cce = {
+        "meto_xc40_cce_loobos_gl4" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                      meto_xc40_cce_loobos_gl4 =>                                      \
+                                      nccmp_monsoon_xc40_cce_loobos_gl4 =>                                \
+                                      housekeep_monsoon_xc40_cce_loobos_gl4",
+
+        "meto_xc40_cce_loobos_euro4" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                        meto_xc40_cce_loobos_euro4 =>                                    \
+                                        nccmp_monsoon_xc40_cce_loobos_euro4 =>                              \
+                                        housekeep_monsoon_xc40_cce_loobos_euro4",
+       
+        "meto_xc40_cce_loobos_forecast" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                           meto_xc40_cce_loobos_forecast =>                                 \
+                                           nccmp_monsoon_xc40_cce_loobos_forecast =>                           \
+                                           housekeep_monsoon_xc40_cce_loobos_forecast",
+       
+        "meto_xc40_cce_loobos_ukv" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                      meto_xc40_cce_loobos_ukv =>                                      \
+                                      nccmp_monsoon_xc40_cce_loobos_ukv =>                                \
+                                      housekeep_monsoon_xc40_cce_loobos_ukv",
+       
+        "meto_xc40_cce_loobos_esm" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                      meto_xc40_cce_loobos_esm_spinup => meto_xc40_cce_loobos_esm =>   \
+                                      nccmp_monsoon_xc40_cce_loobos_esm =>                                \
+                                      housekeep_monsoon_xc40_cce_loobos_esm_spinup & housekeep_monsoon_xc40_cce_loobos_esm",
+
+        "meto_xc40_cce_loobos_julesc" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug =>       \
+                                         meto_xc40_cce_loobos_julesc_spinup => meto_xc40_cce_loobos_julesc =>   \
+                                         nccmp_monsoon_xc40_cce_loobos_julesc =>                                   \
+                                         housekeep_monsoon_xc40_cce_loobos_julesc_spinup & housekeep_monsoon_xc40_cce_loobos_julesc",
+
+        "meto_xc40_cce_loobos_jules_cn" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug =>       \
+                                         meto_xc40_cce_loobos_jules_cn_spinup => meto_xc40_cce_loobos_jules_cn =>   \
+                                         nccmp_monsoon_xc40_cce_loobos_jules_cn =>                                   \
+                                         housekeep_monsoon_xc40_cce_loobos_jules_cn_spinup & housekeep_monsoon_xc40_cce_loobos_jules_cn",
+
+        "meto_xc40_cce_loobos_crops" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                        meto_xc40_cce_loobos_crops =>                                    \
+                                        nccmp_monsoon_xc40_cce_loobos_crops =>                              \
+                                        housekeep_monsoon_xc40_cce_loobos_crops",
+
+        "meto_xc40_cce_loobos_irrig" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                        meto_xc40_cce_loobos_irrig =>                                    \
+                                        nccmp_monsoon_xc40_cce_loobos_irrig =>                              \
+                                        housekeep_monsoon_xc40_cce_loobos_irrig",
+
+        "meto_xc40_cce_loobos_fire" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                       meto_xc40_cce_loobos_fire_spinup => meto_xc40_cce_loobos_fire => \
+                                       nccmp_monsoon_xc40_cce_loobos_fire =>                               \
+                                       housekeep_monsoon_xc40_cce_loobos_fire_spinup & housekeep_monsoon_xc40_cce_loobos_fire",
+       
+        "meto_xc40_cce_loobos_daily_disagg" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                               meto_xc40_cce_loobos_daily_disagg =>                             \
+                                               nccmp_monsoon_xc40_cce_loobos_daily_disagg =>                       \
+                                               housekeep_monsoon_xc40_cce_loobos_daily_disagg",
+
+        "meto_xc40_cce_loobos_crm1_traitF" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                              meto_xc40_cce_loobos_crm1_traitF => \
+                                              nccmp_monsoon_xc40_cce_loobos_crm1_traitF => \
+                                              housekeeping_monsoon_xc40_cce_loobos_crm1_traitF",
+ 
+        "meto_xc40_cce_loobos_crm2_traitF" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                              meto_xc40_cce_loobos_crm2_traitF => \
+                                              nccmp_monsoon_xc40_cce_loobos_crm2_traitF => \
+                                              housekeeping_monsoon_xc40_cce_loobos_crm2_traitF",
+ 
+        "meto_xc40_cce_loobos_crm3_traitF" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                              meto_xc40_cce_loobos_crm3_traitF => \
+                                              nccmp_monsoon_xc40_cce_loobos_crm3_traitF => \
+                                              housekeeping_monsoon_xc40_cce_loobos_crm3_traitF",
+ 
+        "meto_xc40_cce_loobos_crm4_traitF" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                              meto_xc40_cce_loobos_crm4_traitF => \
+                                              nccmp_monsoon_xc40_cce_loobos_crm4_traitF => \
+                                              housekeeping_monsoon_xc40_cce_loobos_crm4_traitF",
+ 
+        "meto_xc40_cce_loobos_crm5_traitF" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                              meto_xc40_cce_loobos_crm5_traitF => \
+                                              nccmp_monsoon_xc40_cce_loobos_crm5_traitF => \
+                                              housekeeping_monsoon_xc40_cce_loobos_crm5_traitF",
+ 
+        "meto_xc40_cce_loobos_crm6_traitF" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                              meto_xc40_cce_loobos_crm6_traitF => \
+                                              nccmp_monsoon_xc40_cce_loobos_crm6_traitF => \
+                                              housekeeping_monsoon_xc40_cce_loobos_crm6_traitF",
+ 
+        "meto_xc40_cce_loobos_crm6_traitT" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                              meto_xc40_cce_loobos_crm6_traitT => \
+                                              nccmp_monsoon_xc40_cce_loobos_crm6_traitT => \
+                                              housekeeping_monsoon_xc40_cce_loobos_crm6_traitT",
+ 
+        "meto_xc40_cce_loobos_crm6_traitF_srfT" : "fcm_make_monsoon_xc40_cce_debug => fcm_make2_monsoon_xc40_cce_debug => \
+                                                   meto_xc40_cce_loobos_crm6_traitF_srfT => \
+                                                   nccmp_monsoon_xc40_cce_loobos_crm6_traitF_srfT => \
+                                                   housekeeping_monsoon_xc40_cce_loobos_crm6_traitF_srfT",
+       
+        "meto_xc40_cce_gswp2_rivers" : "fcm_make_monsoon_xc40_cce_omp => fcm_make2_monsoon_xc40_cce_omp => \
+                                        meto_xc40_cce_gswp2_rivers =>                                \
+                                        nccmp_monsoon_xc40_cce_gswp2_rivers =>                          \
+                                        housekeep_monsoon_xc40_cce_gswp2_rivers",
+       
+        "meto_xc40_cce_gswp2_trip" : "fcm_make_monsoon_xc40_cce_omp => fcm_make2_monsoon_xc40_cce_omp => \
+                                        meto_xc40_cce_gswp2_trip =>                                \
+                                        nccmp_monsoon_xc40_cce_gswp2_trip =>                          \
+                                        housekeep_monsoon_xc40_cce_gswp2_trip",
+       
+        "meto_xc40_cce_gswp2_trip_restart" : "fcm_make_monsoon_xc40_cce_omp => fcm_make2_monsoon_xc40_cce_omp => \
+                                        meto_xc40_cce_gswp2_trip_spinup => meto_xc40_cce_gswp2_trip_restart => \
+                                        nccmp_monsoon_xc40_cce_gswp2_trip_restart =>                          \
+                                        housekeep_monsoon_xc40_cce_gswp2_trip_spinup => housekeep_monsoon_xc40_cce_gswp2_trip_restart",
+
+        "meto_xc40_cce_gswp2_closures" : "fcm_make_monsoon_xc40_cce_omp => fcm_make2_monsoon_xc40_cce_omp => \
+                                          meto_xc40_cce_gswp2_closures =>                              \
+                                          nccmp_monsoon_xc40_cce_gswp2_closures =>                        \
+                                          housekeep_monsoon_xc40_cce_gswp2_closures",
+    }
+%}
+
+
+###############################################################################
+## Group definitions
+###############################################################################
+{%- set groups_xc40_cce = {
+        "xc40_cce" : ["xc40_cce_loobos", "xc40_cce_gswp2"],
+        
+        "xc40_cce_loobos" : ["meto_xc40_cce_loobos_gl4", "meto_xc40_cce_loobos_euro4",
+                             "meto_xc40_cce_loobos_forecast", "meto_xc40_cce_loobos_ukv",
+                             "meto_xc40_cce_loobos_esm", "meto_xc40_cce_loobos_crops",
+                             "meto_xc40_cce_loobos_fire", "meto_xc40_cce_loobos_daily_disagg",
+                             "meto_xc40_cce_loobos_julesc", "meto_xc40_cce_loobos_irrig",
+                             "meto_xc40_cce_loobos_jules_cn",
+                             "meto_xc40_cce_loobos_crm1_traitF", "meto_xc40_cce_loobos_crm2_traitF",
+                             "meto_xc40_cce_loobos_crm3_traitF", "meto_xc40_cce_loobos_crm4_traitF",
+                             "meto_xc40_cce_loobos_crm5_traitF", "meto_xc40_cce_loobos_crm6_traitF",
+                             "meto_xc40_cce_loobos_crm6_traitT", "meto_xc40_cce_loobos_crm6_traitF_srfT"],
+                                
+        "xc40_cce_gswp2" : ["meto_xc40_cce_gswp2_rivers", "meto_xc40_cce_gswp2_trip", 
+                            "meto_xc40_cce_gswp2_trip_restart", "meto_xc40_cce_gswp2_closures"],
+    }
+%}

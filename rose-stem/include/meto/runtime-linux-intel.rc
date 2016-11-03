@@ -1,0 +1,552 @@
+###############################################################################
+## Build jobs
+###############################################################################
+# Linux Intel build jobs
+    [[METO_LINUX_INTEL_BUILD]]
+        inherit = METO_LINUX_BUILD
+
+{%- if COVERAGE == true %}
+    [[fcm_make_meto_linux_intel_coverage]]
+        inherit = METO_LINUX_INTEL_BUILD
+        pre-command scripting = mkdir -p $CYLC_SUITE_SHARE_DIR/coverage
+        [[[environment]]]
+            JULES_PLATFORM = meto-linux-intel-nompi
+            JULES_BUILD = normal
+            JULES_OMP = noomp
+            JULES_FFLAGS_EXTRA  = -prof-gen=srcpos -prof-dir $CYLC_SUITE_SHARE_DIR/coverage
+            JULES_LDFLAGS_EXTRA = -prof-gen=srcpos -prof-dir $CYLC_SUITE_SHARE_DIR/coverage
+{%- else %}
+    [[fcm_make_meto_linux_intel_debug_noomp_nompi]]
+        inherit = METO_LINUX_INTEL_BUILD
+        [[[environment]]]
+            JULES_PLATFORM = meto-linux-intel-nompi
+            JULES_BUILD = debug
+            JULES_OMP = noomp
+            
+    [[fcm_make_meto_linux_intel_omp_nompi]]
+        inherit = METO_LINUX_INTEL_BUILD
+        [[[environment]]]
+            JULES_PLATFORM = meto-linux-intel-nompi
+            JULES_BUILD = normal
+            JULES_OMP = omp
+            
+    [[fcm_make_meto_linux_intel_noomp_mpi]]
+        inherit = METO_LINUX_INTEL_BUILD
+        [[[environment]]]
+            JULES_PLATFORM = meto-linux-intel-mpi
+            JULES_BUILD = normal
+            JULES_OMP = noomp
+{%- endif %}
+            
+###############################################################################
+## Compute jobs
+###############################################################################
+# Family for Loobos jobs with the Intel compiler
+    [[METO_LINUX_INTEL_LOOBOS]]
+        inherit = LOOBOS, METO_LINUX_COMPUTE
+        [[[environment]]]
+{%- if COVERAGE == true %}
+            BUILD_NAME = fcm_make_meto_linux_intel_coverage
+{%- else %}
+            BUILD_NAME = fcm_make_meto_linux_intel_debug_noomp_nompi
+{%- endif %}
+            MPI_NUM_TASKS = 1
+            OMP_NUM_THREADS = 1
+            NPROC = $MPI_NUM_TASKS
+
+    [[meto_linux_intel_loobos_gl4]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_gl4
+
+    [[meto_linux_intel_loobos_euro4]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_euro4
+
+    [[meto_linux_intel_loobos_forecast]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_forecast
+
+    [[meto_linux_intel_loobos_ukv]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_ukv
+
+    [[meto_linux_intel_loobos_esm_spinup]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_esm_spinup
+
+    [[meto_linux_intel_loobos_esm]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_esm
+            DUMP_FILE = ../meto_linux_intel_loobos_esm_spinup/output/meto_linux_intel_loobos_esm_spinup.dump.19971231.82800.nc
+
+    [[meto_linux_intel_loobos_julesc_spinup]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_julesc_spinup
+
+    [[meto_linux_intel_loobos_julesc]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_julesc
+            DUMP_FILE = ../meto_linux_intel_loobos_julesc_spinup/output/meto_linux_intel_loobos_julesc_spinup.dump.19971231.82800.nc
+
+    [[meto_linux_intel_loobos_jules_c1p1]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_jules_c1p1
+            DUMP_FILE = ../meto_linux_intel_loobos_julesc_spinup/output/meto_linux_intel_loobos_julesc_spinup.dump.19971231.82800.nc
+
+    [[meto_linux_intel_loobos_jules_cn_spinup]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_jules_cn_spinup
+
+    [[meto_linux_intel_loobos_jules_cn]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_jules_cn
+            DUMP_FILE = ../meto_linux_intel_loobos_jules_cn_spinup/output/meto_linux_intel_loobos_jules_cn_spinup.dump.19971231.82800.nc
+
+    [[meto_linux_intel_loobos_crops]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crops
+
+    [[meto_linux_intel_loobos_irrig]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_irrig
+
+    [[meto_linux_intel_loobos_fire_spinup]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_fire_spinup
+
+    [[meto_linux_intel_loobos_fire]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_fire
+            DUMP_FILE = ../meto_linux_intel_loobos_fire_spinup/output/meto_linux_intel_loobos_fire_spinup.dump.19971231.82800.nc
+            
+    [[meto_linux_intel_loobos_daily_disagg]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_daily_disagg
+
+    [[meto_linux_intel_loobos_crm1_traitF]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crm1_traitF
+
+    [[meto_linux_intel_loobos_crm2_traitF]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crm2_traitF
+
+    [[meto_linux_intel_loobos_crm3_traitF]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crm3_traitF
+
+    [[meto_linux_intel_loobos_crm4_traitF]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crm4_traitF
+
+    [[meto_linux_intel_loobos_crm5_traitF]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crm5_traitF
+
+    [[meto_linux_intel_loobos_crm6_traitF]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crm6_traitF
+
+    [[meto_linux_intel_loobos_crm6_traitT]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crm6_traitT
+
+    [[meto_linux_intel_loobos_crm6_traitF_srfT]]
+        inherit = METO_LINUX_INTEL_LOOBOS
+        [[[environment]]]
+            ROSE_TASK_APP = loobos_crm6_traitF_srfT
+
+    [[METO_LINUX_INTEL_GSWP2]]
+        inherit = GSWP2, METO_LINUX_COMPUTE
+        pre-command scripting = gen_gswp2_drive_file
+
+# For GSWP2 rivers, use MPI
+    [[meto_linux_intel_gswp2_rivers]]
+        inherit = METO_LINUX_INTEL_GSWP2
+        [[[environment]]]
+            ROSE_TASK_APP = gswp2_rivers
+{%- if COVERAGE == true %}
+            BUILD_NAME = fcm_make_meto_linux_intel_coverage
+            OMP_NUM_THREADS = 1
+{%- else %}
+            BUILD_NAME = fcm_make_meto_linux_intel_noomp_mpi
+            OMP_NUM_THREADS = 1
+{%- endif %}
+            MPI_NUM_TASKS = 4
+            NPROC = $MPI_NUM_TASKS
+            
+            
+# For GSWP2 trip, use MPI
+    [[meto_linux_intel_gswp2_trip]]
+        inherit = METO_LINUX_INTEL_GSWP2
+        [[[environment]]]
+            ROSE_TASK_APP = gswp2_trip
+{%- if COVERAGE == true %}
+            BUILD_NAME = fcm_make_meto_linux_intel_coverage
+            OMP_NUM_THREADS = 1
+{%- else %}
+            BUILD_NAME = fcm_make_meto_linux_intel_noomp_mpi
+            OMP_NUM_THREADS = 1
+{%- endif %}
+            MPI_NUM_TASKS = 4
+            NPROC = $MPI_NUM_TASKS   
+            
+            
+# For GSWP2 trip spinup, use MPI
+    [[meto_linux_intel_gswp2_trip_spinup]]
+        inherit = METO_LINUX_INTEL_GSWP2
+        [[[environment]]]
+            ROSE_TASK_APP = gswp2_trip_spinup
+{%- if COVERAGE == true %}
+            BUILD_NAME = fcm_make_meto_linux_intel_coverage
+            OMP_NUM_THREADS = 1
+{%- else %}
+            BUILD_NAME = fcm_make_meto_linux_intel_noomp_mpi
+            OMP_NUM_THREADS = 1
+{%- endif %}
+            MPI_NUM_TASKS = 4
+            NPROC = $MPI_NUM_TASKS     
+
+# For GSWP2 trip restart, use MPI
+    [[meto_linux_intel_gswp2_trip_restart]]
+        inherit = METO_LINUX_INTEL_GSWP2
+        [[[environment]]]
+            ROSE_TASK_APP = gswp2_trip_restart
+{%- if COVERAGE == true %}
+            BUILD_NAME = fcm_make_meto_linux_intel_coverage
+            OMP_NUM_THREADS = 1
+{%- else %}
+            BUILD_NAME = fcm_make_meto_linux_intel_noomp_mpi
+            OMP_NUM_THREADS = 1
+{%- endif %}
+            MPI_NUM_TASKS = 4
+            NPROC = $MPI_NUM_TASKS 
+            DUMP_FILE = ../meto_linux_intel_gswp2_trip_spinup/output/meto_linux_intel_gswp2_trip_spinup.dump.19820701.10800.nc
+               
+            
+# For GSWP2 closures, use MPI
+    [[meto_linux_intel_gswp2_closures]]
+        inherit = METO_LINUX_INTEL_GSWP2
+        [[[environment]]]
+            ROSE_TASK_APP = gswp2_closures
+{%- if COVERAGE == true %}
+            BUILD_NAME = fcm_make_meto_linux_intel_coverage
+            MPI_NUM_TASKS = 1
+{%- else %}
+            BUILD_NAME = fcm_make_meto_linux_intel_noomp_mpi
+            MPI_NUM_TASKS = 4
+{%- endif %}
+            OMP_NUM_THREADS = 1
+            NPROC = $MPI_NUM_TASKS
+            
+{%- if COVERAGE == true %}
+###############################################################################
+## Code coverage job, if requested
+###############################################################################
+    [[coverage_summary]]
+        inherit = None, METO_LINUX
+        command scripting = """
+profmerge -prof-dir $CYLC_SUITE_SHARE_DIR/coverage
+codecov -prj JULES -dpi $CYLC_SUITE_SHARE_DIR/coverage/pgopti.dpi -spi $CYLC_SUITE_SHARE_DIR/coverage/pgopti.spi
+"""
+{%- endif %}
+
+###############################################################################
+## Comparison jobs
+###############################################################################
+    [[METO_LINUX_INTEL_NETCDF_COMPARISON]]
+        inherit = KGO_CHECK, METO_LINUX_NETCDF_COMPARISON
+
+    [[nccmp_meto_linux_intel_loobos_gl4]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_gl4/output
+
+    [[nccmp_meto_linux_intel_loobos_euro4]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_euro4/output
+
+    [[nccmp_meto_linux_intel_loobos_forecast]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_forecast/output
+
+    [[nccmp_meto_linux_intel_loobos_ukv]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_ukv/output
+
+    [[nccmp_meto_linux_intel_loobos_esm]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_esm/output
+
+    [[nccmp_meto_linux_intel_loobos_julesc]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_julesc/output
+
+    [[nccmp_meto_linux_intel_loobos_jules_c1p1]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_jules_c1p1/output
+
+    [[nccmp_meto_linux_intel_loobos_jules_cn]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_jules_cn/output
+
+    [[nccmp_meto_linux_intel_loobos_fire]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_fire/output
+
+    [[nccmp_meto_linux_intel_loobos_crops]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crops/output
+
+    [[nccmp_meto_linux_intel_loobos_irrig]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_irrig/output
+
+    [[nccmp_meto_linux_intel_loobos_daily_disagg]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_daily_disagg/output
+
+    [[nccmp_meto_linux_intel_loobos_crm1_traitF]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crm1_traitF/output
+
+    [[nccmp_meto_linux_intel_loobos_crm2_traitF]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crm2_traitF/output
+
+    [[nccmp_meto_linux_intel_loobos_crm3_traitF]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crm3_traitF/output
+
+    [[nccmp_meto_linux_intel_loobos_crm4_traitF]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crm4_traitF/output
+
+    [[nccmp_meto_linux_intel_loobos_crm5_traitF]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crm5_traitF/output
+
+    [[nccmp_meto_linux_intel_loobos_crm6_traitF]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crm6_traitF/output
+
+    [[nccmp_meto_linux_intel_loobos_crm6_traitT]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crm6_traitT/output
+
+    [[nccmp_meto_linux_intel_loobos_crm6_traitF_srfT]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_loobos_crm6_traitF_srfT/output
+
+    [[nccmp_meto_linux_intel_gswp2_rivers]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_gswp2_rivers/output
+
+    [[nccmp_meto_linux_intel_gswp2_trip]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_gswp2_trip/output
+
+    [[nccmp_meto_linux_intel_gswp2_trip_restart]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_gswp2_trip_restart/output
+
+    [[nccmp_meto_linux_intel_gswp2_closures]]
+        inherit = METO_LINUX_INTEL_NETCDF_COMPARISON
+        [[[environment]]]
+            OUTPUT_DIR = ../meto_linux_intel_gswp2_closures/output
+
+###############################################################################
+## Housekeeping jobs
+###############################################################################
+    [[METO_LINUX_INTEL_HOUSEKEEPING]]
+        inherit = HOUSEKEEPING, METO_LINUX
+
+    [[housekeep_meto_linux_intel_loobos_gl4]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_gl4
+
+    [[housekeep_meto_linux_intel_loobos_euro4]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_euro4
+
+    [[housekeep_meto_linux_intel_loobos_forecast]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+           DIR1 = ../meto_linux_intel_loobos_forecast
+
+    [[housekeep_meto_linux_intel_loobos_ukv]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_ukv
+
+    [[housekeep_meto_linux_intel_loobos_esm_spinup]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_esm_spinup
+
+    [[housekeep_meto_linux_intel_loobos_esm]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_esm
+
+    [[housekeep_meto_linux_intel_loobos_julesc_spinup]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_julesc_spinup
+
+    [[housekeep_meto_linux_intel_loobos_julesc]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_julesc
+
+    [[housekeep_meto_linux_intel_loobos_jules_c1p1]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_jules_c1p1
+
+    [[housekeep_meto_linux_intel_loobos_jules_cn_spinup]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_jules_cn_spinup
+
+    [[housekeep_meto_linux_intel_loobos_jules_cn]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_jules_cn
+
+    [[housekeep_meto_linux_intel_loobos_crops]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crops
+       
+    [[housekeep_meto_linux_intel_loobos_irrig]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_irrig
+       
+    [[housekeep_meto_linux_intel_loobos_fire_spinup]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_fire_spinup
+
+    [[housekeep_meto_linux_intel_loobos_fire]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_fire
+
+    [[housekeep_meto_linux_intel_loobos_daily_disagg]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_daily_disagg
+
+    [[housekeeping_meto_linux_intel_loobos_crm1_traitF]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crm1_traitF
+
+    [[housekeeping_meto_linux_intel_loobos_crm2_traitF]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crm2_traitF
+
+    [[housekeeping_meto_linux_intel_loobos_crm3_traitF]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crm3_traitF
+
+    [[housekeeping_meto_linux_intel_loobos_crm4_traitF]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crm4_traitF
+
+    [[housekeeping_meto_linux_intel_loobos_crm5_traitF]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crm5_traitF
+
+    [[housekeeping_meto_linux_intel_loobos_crm6_traitF]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crm6_traitF
+
+    [[housekeeping_meto_linux_intel_loobos_crm6_traitT]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crm6_traitT
+
+    [[housekeeping_meto_linux_intel_loobos_crm6_traitF_srfT]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_loobos_crm6_traitF_srfT
+
+    [[housekeep_meto_linux_intel_gswp2_rivers]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_gswp2_rivers
+
+    [[housekeep_meto_linux_intel_gswp2_trip]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_gswp2_trip
+
+    [[housekeep_meto_linux_intel_gswp2_trip_spinup]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_gswp2_trip_spinup
+
+    [[housekeep_meto_linux_intel_gswp2_trip_restart]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_gswp2_trip_restart
+	       
+    [[housekeep_meto_linux_intel_gswp2_closures]]
+        inherit = METO_LINUX_INTEL_HOUSEKEEPING
+        [[[environment]]]
+            DIR1 = ../meto_linux_intel_gswp2_closures

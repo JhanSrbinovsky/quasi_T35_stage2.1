@@ -1,0 +1,97 @@
+###############################################################################
+## Name graphs
+###############################################################################
+{%- set name_graphs = {
+        "loobos_gl4" : "fcm_make_debug => \
+                        loobos_gl4 => nccmp_loobos_gl4 => housekeep_loobos_gl4",
+
+        "loobos_euro4" : "fcm_make_debug => \
+                          loobos_euro4 => nccmp_loobos_euro4 => housekeep_loobos_euro4",
+       
+        "loobos_forecast" : "fcm_make_debug => \
+                             loobos_forecast => nccmp_loobos_forecast => housekeep_loobos_forecast",
+        
+        "loobos_ukv" : "fcm_make_debug => \
+                        loobos_ukv => nccmp_loobos_ukv => housekeep_loobos_ukv",
+       
+        "loobos_esm" : "fcm_make_debug => \
+                        loobos_esm_spinup => loobos_esm => nccmp_loobos_esm => \
+                        housekeep_loobos_esm_spinup & housekeep_loobos_esm",
+
+        "loobos_julesc" : "fcm_make_debug => \
+                           loobos_julesc_spinup => loobos_julesc => nccmp_loobos_julesc => \
+                           housekeep_loobos_julesc_spinup & housekeep_loobos_julesc",
+
+        "loobos_crops" : "fcm_make_debug => \
+                          loobos_crops => nccmp_loobos_crops => housekeep_loobos_crops",
+
+        "loobos_irrig" : "fcm_make_debug => \
+                          loobos_irrig => nccmp_loobos_irrig => housekeep_loobos_irrig",
+
+        "loobos_fire" : "fcm_make_debug => \
+                         loobos_fire_spinup => loobos_fire => nccmp_loobos_fire => \
+                         housekeep_loobos_fire_spinup & housekeep_loobos_fire",
+       
+        "loobos_daily_disagg" : "fcm_make_debug => \
+                                 loobos_daily_disagg => nccmp_loobos_daily_disagg => \
+                                 housekeep_loobos_daily_disagg",
+                         
+        "loobos_crm1_traitF" : "fcm_make_debug => \
+                                loobos_crm1_traitF => nccmp_loobos_crm1_traitF => \
+                                housekeeping_loobos_crm1_traitF",
+ 
+        "loobos_crm2_traitF" : "fcm_make_debug => \
+                                loobos_crm2_traitF => nccmp_loobos_crm2_traitF => \
+                                housekeeping_loobos_crm2_traitF",
+ 
+        "loobos_crm3_traitF" : "fcm_make_debug => \
+                                loobos_crm3_traitF => nccmp_loobos_crm3_traitF => \
+                                housekeeping_loobos_crm3_traitF",
+ 
+        "loobos_crm4_traitF" : "fcm_make_debug => \
+                                loobos_crm4_traitF => nccmp_loobos_crm4_traitF => \
+                                housekeeping_loobos_crm4_traitF",
+ 
+        "loobos_crm5_traitF" : "fcm_make_debug => \
+                                loobos_crm5_traitF => nccmp_loobos_crm5_traitF => \
+                                housekeeping_loobos_crm5_traitF",
+ 
+        "loobos_crm6_traitF" : "fcm_make_debug => \
+                                loobos_crm6_traitF => nccmp_loobos_crm6_traitF => \
+                                housekeeping_loobos_crm6_traitF",
+ 
+        "loobos_crm6_traitT" : "fcm_make_debug => \
+                                loobos_crm6_traitT => nccmp_loobos_crm6_traitT => \
+                                housekeeping_loobos_crm6_traitT",
+ 
+        "loobos_crm6_traitF_srfT" : "fcm_make_debug => \
+                                     loobos_crm6_traitF_srfT => nccmp_loobos_crm6_traitF_srfT => \
+                                     housekeeping_loobos_crm6_traitF_srfT",
+       
+        "gswp2_rivers" : "fcm_make_mpi => gswp2_rivers => nccmp_gswp2_rivers => housekeep_gswp2_rivers",
+
+        "gswp2_trip" : "fcm_make_mpi => gswp2_trip => nccmp_gswp2_trip => housekeep_gswp2_trip",
+       
+        "gswp2_trip_restart" : "fcm_make_mpi => gswp2_trip_spinup => gswp2_trip_restart => nccmp_gswp2_trip_restart => housekeep_gswp2_trip_spinup => housekeep_gswp2_trip_restart",
+
+        "gswp2_closures" : "fcm_make_mpi => gswp2_closures => nccmp_gswp2_closures => housekeep_gswp2_closures",
+    }
+%}
+
+
+###############################################################################
+## Group definitions
+###############################################################################
+{%- set groups = {
+        "all" : ["loobos", "gswp2"],
+        
+        "loobos" : ["loobos_gl4", "loobos_euro4", "loobos_forecast", "loobos_ukv",
+                    "loobos_esm", "loobos_crops", "loobos_fire", "loobos_daily_disagg",
+                    "loobos_julesc", "loobos_irrig",
+                    "loobos_crm1_traitF", "loobos_crm2_traitF", "loobos_crm3_traitF",
+                    "loobos_crm4_traitF", "loobos_crm5_traitF", "loobos_crm6_traitF",
+                    "loobos_crm6_traitT", "loobos_crm6_traitF_srfT"],
+                                
+        "gswp2" : ["gswp2_rivers", "gswp2_trip", "gswp2_trip_restart", "gswp2_closures"],
+    }
+%}

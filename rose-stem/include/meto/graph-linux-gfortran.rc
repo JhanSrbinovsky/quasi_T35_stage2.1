@@ -1,0 +1,150 @@
+###############################################################################
+## Name graphs
+###############################################################################
+{%- set name_graphs_linux_gfortran = {
+        "meto_linux_gfortran_loobos_gl4" : "fcm_make_meto_linux_gfortran_debug =>   \
+                                            meto_linux_gfortran_loobos_gl4 =>       \
+                                            nccmp_meto_linux_gfortran_loobos_gl4 => \
+                                            housekeep_meto_linux_gfortran_loobos_gl4",
+
+        "meto_linux_gfortran_loobos_euro4" : "fcm_make_meto_linux_gfortran_debug =>     \
+                                              meto_linux_gfortran_loobos_euro4 =>       \
+                                              nccmp_meto_linux_gfortran_loobos_euro4 => \
+                                              housekeep_meto_linux_gfortran_loobos_euro4",
+       
+        "meto_linux_gfortran_loobos_forecast" : "fcm_make_meto_linux_gfortran_debug =>        \
+                                                 meto_linux_gfortran_loobos_forecast =>       \
+                                                 nccmp_meto_linux_gfortran_loobos_forecast => \
+                                                 housekeep_meto_linux_gfortran_loobos_forecast",
+        
+        "meto_linux_gfortran_loobos_ukv" : "fcm_make_meto_linux_gfortran_debug =>   \
+                                            meto_linux_gfortran_loobos_ukv =>       \
+                                            nccmp_meto_linux_gfortran_loobos_ukv => \
+                                            housekeep_meto_linux_gfortran_loobos_ukv",
+       
+        "meto_linux_gfortran_loobos_esm" : "fcm_make_meto_linux_gfortran_debug =>                                      \
+                                            meto_linux_gfortran_loobos_esm_spinup => meto_linux_gfortran_loobos_esm => \
+                                            nccmp_meto_linux_gfortran_loobos_esm =>                                    \
+                                            housekeep_meto_linux_gfortran_loobos_esm_spinup & housekeep_meto_linux_gfortran_loobos_esm",
+
+        "meto_linux_gfortran_loobos_julesc" : "fcm_make_meto_linux_gfortran_debug =>                                            \
+                                               meto_linux_gfortran_loobos_julesc_spinup => meto_linux_gfortran_loobos_julesc &  \
+                                               meto_linux_gfortran_loobos_jules_c1p1 =>                                         \
+                                               nccmp_meto_linux_gfortran_loobos_julesc & nccmp_meto_linux_gfortran_loobos_jules_c1p1 =>  \
+                                               housekeep_meto_linux_gfortran_loobos_julesc_spinup & housekeep_meto_linux_gfortran_loobos_jules_c1p1 \
+                                               & housekeep_meto_linux_gfortran_loobos_julesc",
+
+        "meto_linux_gfortran_loobos_jules_cn" : "fcm_make_meto_linux_gfortran_debug =>                                            \
+                                               meto_linux_gfortran_loobos_jules_cn_spinup => meto_linux_gfortran_loobos_jules_cn => \
+                                               nccmp_meto_linux_gfortran_loobos_jules_cn =>                                       \
+                                               housekeep_meto_linux_gfortran_loobos_jules_cn_spinup & housekeep_meto_linux_gfortran_loobos_jules_cn",
+
+        "meto_linux_gfortran_loobos_crops" : "fcm_make_meto_linux_gfortran_debug =>     \
+                                              meto_linux_gfortran_loobos_crops =>       \
+                                              nccmp_meto_linux_gfortran_loobos_crops => \
+                                              housekeep_meto_linux_gfortran_loobos_crops",
+
+        "meto_linux_gfortran_loobos_irrig" : "fcm_make_meto_linux_gfortran_debug =>     \
+                                              meto_linux_gfortran_loobos_irrig =>       \
+                                              nccmp_meto_linux_gfortran_loobos_irrig => \
+                                              housekeep_meto_linux_gfortran_loobos_irrig",
+
+        "meto_linux_gfortran_loobos_fire" : "fcm_make_meto_linux_gfortran_debug =>                                        \
+                                             meto_linux_gfortran_loobos_fire_spinup => meto_linux_gfortran_loobos_fire => \
+                                             nccmp_meto_linux_gfortran_loobos_fire =>                                     \
+                                             housekeep_meto_linux_gfortran_loobos_fire_spinup & housekeep_meto_linux_gfortran_loobos_fire",
+       
+        "meto_linux_gfortran_loobos_daily_disagg" : "fcm_make_meto_linux_gfortran_debug =>            \
+                                                     meto_linux_gfortran_loobos_daily_disagg =>       \
+                                                     nccmp_meto_linux_gfortran_loobos_daily_disagg => \
+                                                     housekeep_meto_linux_gfortran_loobos_daily_disagg",
+
+        "meto_linux_gfortran_loobos_crm1_traitF" : "fcm_make_meto_linux_gfortran_debug => \
+                                                    meto_linux_gfortran_loobos_crm1_traitF => \
+                                                    nccmp_meto_linux_gfortran_loobos_crm1_traitF => \
+                                                    housekeeping_meto_linux_gfortran_loobos_crm1_traitF",
+ 
+        "meto_linux_gfortran_loobos_crm2_traitF" : "fcm_make_meto_linux_gfortran_debug => \
+                                                    meto_linux_gfortran_loobos_crm2_traitF => \
+                                                    nccmp_meto_linux_gfortran_loobos_crm2_traitF => \
+                                                    housekeeping_meto_linux_gfortran_loobos_crm2_traitF",
+ 
+        "meto_linux_gfortran_loobos_crm3_traitF" : "fcm_make_meto_linux_gfortran_debug => \
+                                                    meto_linux_gfortran_loobos_crm3_traitF => \
+                                                    nccmp_meto_linux_gfortran_loobos_crm3_traitF => \
+                                                    housekeeping_meto_linux_gfortran_loobos_crm3_traitF",
+ 
+        "meto_linux_gfortran_loobos_crm4_traitF" : "fcm_make_meto_linux_gfortran_debug => \
+                                                    meto_linux_gfortran_loobos_crm4_traitF => \
+                                                    nccmp_meto_linux_gfortran_loobos_crm4_traitF => \
+                                                    housekeeping_meto_linux_gfortran_loobos_crm4_traitF",
+ 
+        "meto_linux_gfortran_loobos_crm5_traitF" : "fcm_make_meto_linux_gfortran_debug => \
+                                                    meto_linux_gfortran_loobos_crm5_traitF => \
+                                                    nccmp_meto_linux_gfortran_loobos_crm5_traitF => \
+                                                    housekeeping_meto_linux_gfortran_loobos_crm5_traitF",
+ 
+        "meto_linux_gfortran_loobos_crm6_traitF" : "fcm_make_meto_linux_gfortran_debug => \
+                                                    meto_linux_gfortran_loobos_crm6_traitF => \
+                                                    nccmp_meto_linux_gfortran_loobos_crm6_traitF => \
+                                                    housekeeping_meto_linux_gfortran_loobos_crm6_traitF",
+ 
+        "meto_linux_gfortran_loobos_crm6_traitT" : "fcm_make_meto_linux_gfortran_debug => \
+                                                    meto_linux_gfortran_loobos_crm6_traitT => \
+                                                    nccmp_meto_linux_gfortran_loobos_crm6_traitT => \
+                                                    housekeeping_meto_linux_gfortran_loobos_crm6_traitT",
+ 
+        "meto_linux_gfortran_loobos_crm6_traitF_srfT" : "fcm_make_meto_linux_gfortran_debug => \
+                                                         meto_linux_gfortran_loobos_crm6_traitF_srfT => \
+                                                         nccmp_meto_linux_gfortran_loobos_crm6_traitF_srfT => \
+                                                         housekeeping_meto_linux_gfortran_loobos_crm6_traitF_srfT",
+       
+        "meto_linux_gfortran_gswp2_rivers" : "fcm_make_meto_linux_gfortran_omp =>       \
+                                              meto_linux_gfortran_gswp2_rivers =>       \
+                                              nccmp_meto_linux_gfortran_gswp2_rivers => \
+                                              housekeep_meto_linux_gfortran_gswp2_rivers",
+       
+        "meto_linux_gfortran_gswp2_trip" : "fcm_make_meto_linux_gfortran_omp =>       \
+                                              meto_linux_gfortran_gswp2_trip =>       \
+                                              nccmp_meto_linux_gfortran_gswp2_trip => \
+                                              housekeep_meto_linux_gfortran_gswp2_trip",
+       
+        "meto_linux_gfortran_gswp2_trip_restart" : "fcm_make_meto_linux_gfortran_omp =>       \
+                                              meto_linux_gfortran_gswp2_trip_spinup => meto_linux_gfortran_gswp2_trip_restart =>       \
+                                              nccmp_meto_linux_gfortran_gswp2_trip_restart => \
+                                              housekeep_meto_linux_gfortran_gswp2_trip_spinup => housekeep_meto_linux_gfortran_gswp2_trip_restart",
+
+        "meto_linux_gfortran_gswp2_closures" : "fcm_make_meto_linux_gfortran_omp =>         \
+                                                meto_linux_gfortran_gswp2_closures =>       \
+                                                nccmp_meto_linux_gfortran_gswp2_closures => \
+                                                housekeep_meto_linux_gfortran_gswp2_closures",
+    }
+%}
+
+
+###############################################################################
+## Group definitions
+###############################################################################
+{%- set groups_linux_gfortran = {
+        "linux_gfortran" : ["linux_gfortran_loobos", "linux_gfortran_gswp2"],
+        
+        "linux_gfortran_loobos" : ["meto_linux_gfortran_loobos_gl4", "meto_linux_gfortran_loobos_euro4",
+                                   "meto_linux_gfortran_loobos_forecast", "meto_linux_gfortran_loobos_ukv",
+                                   "meto_linux_gfortran_loobos_esm", "meto_linux_gfortran_loobos_crops",
+                                   "meto_linux_gfortran_loobos_fire", "meto_linux_gfortran_loobos_daily_disagg",
+                                   "meto_linux_gfortran_loobos_julesc", "meto_linux_gfortran_loobos_irrig",
+                                   "meto_linux_gfortran_loobos_jules_cn",
+                                   "meto_linux_gfortran_loobos_crm1_traitF",
+                                   "meto_linux_gfortran_loobos_crm2_traitF",
+                                   "meto_linux_gfortran_loobos_crm3_traitF",
+                                   "meto_linux_gfortran_loobos_crm4_traitF",
+                                   "meto_linux_gfortran_loobos_crm5_traitF",
+                                   "meto_linux_gfortran_loobos_crm6_traitF",
+                                   "meto_linux_gfortran_loobos_crm6_traitT",
+                                   "meto_linux_gfortran_loobos_crm6_traitF_srfT"],
+                                
+        "linux_gfortran_gswp2" : ["meto_linux_gfortran_gswp2_rivers", 
+                                  "meto_linux_gfortran_gswp2_trip", "meto_linux_gfortran_gswp2_trip_restart",
+                                  "meto_linux_gfortran_gswp2_closures"],
+    }
+%}
