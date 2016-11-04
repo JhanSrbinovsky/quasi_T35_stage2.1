@@ -21,7 +21,7 @@ MODULE sf_exch_cable_mod
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: ModuleName='SF_EXCH_MOD'
 
 CONTAINS
-SUBROUTINE sf_exch_cable (                                                          &
+SUBROUTINE sf_exch_cable(                                                          &
  land_pts,nsurft,land_index,                                                  &
  surft_index,surft_pts,fland,flandg,                                          &
  nice, nice_use,                                                              &
@@ -57,8 +57,14 @@ SUBROUTINE sf_exch_cable (                                                      
  rhokh_1,rhokh_1_sice_ncats,rhokh_1_sea,rhokm_1,rhokm_land,                   &
  rhokm_ssi,                                                                   &
  dtstar_surft,dtstar,rhokh_gb,anthrop_heat,                                   &
- mype, timestep_number  & ! CABLE_LSM:                                        &
-)
+!CABLE_LSM:
+ mype, timestep_number, cycleno, numcycles,                                   &
+ sm_levels,                                                                   &
+ true_latitude, true_longitude,                                               &
+ bexp_gb, hcon_gb, satcon_gb, sathh_gb,smvcst_gb, smvcwt_gb, smvccl_gb,       &
+ soil_alb, surf_down_sw_cable, ls_rain_cable, ls_snow_cable,                  &
+ cosz_gb, sin_theta_latitude, ardzsoil,co2_mmr, sthu,                         &
+ canht_pft, lai_pft ) 
 
 USE sf_flux_mod, ONLY: sf_flux
 USE sfl_int_mod, ONLY: sfl_int
@@ -149,7 +155,7 @@ USE crop_vars_mod, ONLY: gc_irr_surft, resfs_irr_surft
 
 USE solinc_data, ONLY: sky, l_skyview
 
-! CABLE_LSM:
+!CABLE_LSM:
 USE cable_explicit_main_mod, ONLY : cable_explicit_main
 
 USE parkind1, ONLY: jprb, jpim
@@ -181,13 +187,6 @@ INTEGER                                                                       &
                        ! IN Switch for orographic form drag
 ,fd_stab_dep           ! IN Switch to implement stability
                        !    dependence of orog form drag
-
-! CABLE_LSM:
-INTEGER             ::                                                        &
- mype,                                                                        &
-            ! IN processor number
- timestep_number
-            ! IN experiment timestep number
 
 
 REAL                                                                          &
@@ -985,6 +984,56 @@ REAL(KIND=jprb)               :: zhook_handle
 
 CHARACTER(LEN=*), PARAMETER :: RoutineName='SF_EXCH'
 
+!CABLE_LSM: Dec. vars passed from sf_expl for CABLE
+integer :: mype, timestep_number, cycleno, numcycles,                         &
+  sm_levels        & ! # of soil layers 
+
+REAL,  DIMENSION( tdims%i_end,tdims%j_end ) ::                             &
+  true_latitude,   &
+  true_longitude
+
+!___UM soil/snow/radiation/met vars
+REAL,  DIMENSION(land_pts) :: & 
+  bexp_gb,    & ! => parameter b in Campbell equation 
+  hcon_gb,    & ! 
+  satcon_gb,  & ! hydraulic conductivity @ saturation [mm/s]
+  sathh_gb,   &
+  smvcst_gb,  &
+  smvcwt_gb,  &
+  smvccl_gb,  &
+  soil_alb
+
+REAL, DIMENSION( tdims%i_end, tdims%j_end, 4) ::                         &
+   surf_down_sw_cable 
+
+REAL,  DIMENSION( tdims%i_end,tdims%j_end ) ::                             &
+  ls_rain_cable,    &
+  ls_snow_cable
+
+REAL,  DIMENSION( tdims%i_end,tdims%j_end ) ::                             &
+  cosz_gb, &
+  sin_theta_latitude
+
+REAL,  DIMENSION(sm_levels) :: ardzsoil
+
+REAL :: co2_mmr
+
+REAL, DIMENSION(land_pts, sm_levels) ::                         &
+  sthu 
+
+REAL, DIMENSION(land_pts, npft) ::                              &
+  canht_pft, lai_pft 
+!CABLE_LSM: End 
+
+!CABLE_LSM: dec. vars used locally
+Real, parameter :: fEpsilon = 0.62198
+Real ::                                                                        &
+  fc_virtual,                                                               &
+  fD_T,                                                                        &
+  fDS_RATIO,                                                                   &
+  fLH
+!CABLE_LSM: End 
+
 IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_in,zhook_handle)
 
 !-----------------------------------------------------------------------
@@ -1214,8 +1263,34 @@ IF(formdrag ==  effective_z0) THEN
      )
   END DO
 END IF
- 
-CALL cable_explicit_main( mype, timestep_number )
+
+!CABLE_LSM:
+  CALL cable_explicit_main(                                                    &
+            mype, timestep_number, cycleno, numcycles,                         &
+            !exist
+            tdims%i_end,tdims%j_end, land_pts, nsurft, npft,                   &
+            !passed
+            sm_levels,                                                         &
+            true_latitude, true_longitude,                                     &
+            !exist
+            land_index, tile_frac, surft_pts, surft_index,                     &
+            !passed
+            bexp_gb, hcon_gb, satcon_gb, sathh_gb,                             &
+            smvcst_gb, smvcwt_gb, smvccl_gb, soil_alb,                         & 
+            !exist
+            snow_surft, lw_down,                                               &
+            !passed
+            cosz_gb, surf_down_sw_cable, ls_rain_cable, ls_snow_cable,         &
+            !exist
+            tl_1, qw_1, vshr_land, pstar, z1_tq, z1_uv, canopy, Fland,         &
+            !passed
+            co2_mmr, sthu, canht_pft, lai_pft,                                 &
+            sin_theta_latitude, ardzsoil,                                        &
+            !exist
+            ftl_surft, fqw_surft,                                              &
+            tstar_surft, u_s, u_s_std_surft, cd_surft, ch_surft,               &
+            radnet_surft, fraca, resfs, resft, z0h_surft, z0m_surft,           &
+            recip_l_MO_surft, epot_surft) 
 
 !-----------------------------------------------------------------------
 ! Calculate RESFT with neutral CH and EPDT=0 for use in calculation

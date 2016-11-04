@@ -72,11 +72,16 @@ SUBROUTINE sf_expl_l_cable (                                                    
  resp_p_pft,resp_s,resp_s_tot,resp_l_pft,resp_r_pft,resp_w_pft,               &
  n_leaf,n_root,n_stem,lai_bal,gc,canhc_surft,wt_ext_surft,flake,              &
  surft_index,surft_pts,tile_frac,fsmc,emis_surft,emis_soil,                   &
-! CABLE_LSM:
- mype, timestep_number                                                        &
- )
-
-USE sf_exch_mod,   ONLY: sf_exch
+!CABLE_LSM:
+mype, timestep_number, cycleno, numcycles,                                    &
+true_latitude, true_longitude,                                                &
+bexp_gb, hcon_gb, satcon_gb, sathh_gb, soil_alb,                              & 
+surf_down_sw_cable, ls_rain_cable, ls_snow_cable,                             &
+cosz_gb, sin_theta_latitude                                                   &
+)
+ 
+!CABLE_LSM:
+USE sf_exch_cable_mod,   ONLY: sf_exch_cable
 USE snowtherm_mod, ONLY: snowtherm
 
 USE theta_field_sizes, ONLY : t_i_length
@@ -135,9 +140,6 @@ USE atm_fields_bounds_mod, ONLY:                                              &
 
 USE ozone_vars, ONLY : flux_o3_pft, fo3_pft
 
-! CABLE_LSM:
-USE sf_exch_cable_mod,   ONLY: sf_exch_cable
-
 USE parkind1, ONLY: jprb, jpim
 USE yomhook, ONLY: lhook, dr_hook
 IMPLICIT NONE
@@ -166,13 +168,6 @@ INTEGER, INTENT(IN) ::                                                        &
  nice,                                                                        &
             ! Total number of sea ice categories
  nice_use   ! No. of sea ice categories used fully in surface calculations
-
-! CABLE_LSM:
-INTEGER             ::                                                        &
- mype,                                                                        &
-            ! IN processor number
- timestep_number
-            ! IN experiment timestep number
 
 ! Defining vertical grid of model atmosphere.
 REAL, INTENT(IN) ::                                                           &
@@ -732,6 +727,34 @@ REAL(KIND=jprb)               :: zhook_handle
 
 CHARACTER(LEN=*), PARAMETER :: RoutineName='SF_EXPL_L'
 
+!CABLE_LSM: Passed from surf_couple_
+INTEGER :: mype, timestep_number, cycleno, numcycles
+
+REAL,  DIMENSION( tdims%i_end,tdims%j_end ) ::                                 &
+  true_latitude,   &
+  true_longitude
+
+!___UM soil/snow/radiation/met vars
+REAL,  DIMENSION(land_pts) :: & 
+  bexp_gb,    & ! => parameter b in Campbell equation 
+  hcon_gb,    & ! this is already passed as hcon? 
+  satcon_gb,  & ! hydraulic conductivity @ saturation [mm/s]
+  sathh_gb,   &
+  soil_alb
+
+REAL, DIMENSION( tdims%i_end, tdims%j_end, 4) ::                               &
+   surf_down_sw_cable 
+
+REAL,  DIMENSION( tdims%i_end,tdims%j_end ) ::                                 &
+  ls_rain_cable,    &
+  ls_snow_cable
+
+REAL,  DIMENSION( tdims%i_end,tdims%j_end ) ::                                 &
+  cosz_gb, &
+  sin_theta_latitude
+!CABLE_LSM: End
+
+
 IF (lhook) CALL dr_hook(RoutineName,zhook_in,zhook_handle)
 
 !-----------------------------------------------------------------------
@@ -1088,9 +1111,18 @@ CALL sf_exch_cable (                                                          &
  r_b_dust,cd_std_dust,u_s_std_surft,                                          &
  rhokh_surft,rhokh_sice,rhokh_sea,rhokm_1,rhokm_land,rhokm_ssi,               &
  dtstar_surft,dtstar,rhokh,anthrop_heat_surft,                                &
- mype, timestep_number                                                        &
+!CABLE_LSM:
+mype, timestep_number, cycleno, numcycles,                                    &
+sm_levels,  
+true_latitude, true_longitude,                                                &
+bexp_gb, hcon_gb, satcon_gb, sathh_gb,                                        &
+smvcst, smvcwt, smvccl,                                                       & 
+soil_alb, surf_down_sw_cable, ls_rain_cable, ls_snow_cable,                   &
+cosz_gb,                                                                      &
+sin_theta_latitude,                                                           &
+dzsoil, co2_mmr, sthu,                                                        &
+canht_pft, lai_pft                                                            &
  )
-
 
 IF (lhook) CALL dr_hook(RoutineName,zhook_out,zhook_handle)
 

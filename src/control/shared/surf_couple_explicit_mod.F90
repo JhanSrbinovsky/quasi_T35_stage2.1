@@ -164,6 +164,15 @@ USE trif_vars_mod,            ONLY:                                           &
 USE lsm_switches_mod,        ONLY: lsm_id
 USE um_parcore,              ONLY : mype
 USE timestep_mod,            ONLY : timestep_number 
+USE p_s_parms,                ONLY :                                          &
+  bexp_gb, sathh_gb, satcon_gb
+USE atm_fields_real_mod, ONLY : soil_alb!, lw_down
+USE trignometric_mod, ONLY :                                                  &
+  sin_theta_latitude, true_latitude, true_longitude
+USE cable_gather_um_data_decs, ONLY :                                         & 
+  ls_rain_cable, ls_snow_cable, surf_down_sw_cable
+!CABLE_LSM: End
+
 !Dr Hook
 USE parkind1, ONLY: jprb, jpim
 USE yomhook, ONLY: lhook, dr_hook
@@ -719,7 +728,14 @@ ENDIF
         n_leaf_pft,n_root_pft,n_stem_pft,lai_bal_pft,                         &
         gc_surft,canhc_surft,wt_ext_surft,flake,                              &
         surft_index,surft_pts,tile_frac,fsmc,emis_surft,emis_soil,            &
-        mype, timestep_number                                                 &  
+!CABLE_LSM:
+        mype, timestep_number, cycleno, numcycles,                            &
+        true_latitude, true_longitude,                                        &
+        bexp_gb, hcon_gb,satcon_gb, sathh_gb,                                 &
+        soil_alb,                                                             & 
+        surf_down_sw_cable, ls_rain_cable, ls_snow_cable,                     &
+        cosz_gb, sin_theta_latitude                                           &
+!CABLE_LSM: End
         )
 
 
