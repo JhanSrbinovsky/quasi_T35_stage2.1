@@ -986,7 +986,7 @@ CHARACTER(LEN=*), PARAMETER :: RoutineName='SF_EXCH'
 
 !CABLE_LSM: Dec. vars passed from sf_expl for CABLE
 integer :: mype, timestep_number, cycleno, numcycles,                         &
-  sm_levels        & ! # of soil layers 
+  sm_levels         ! # of soil layers 
 
 REAL,  DIMENSION( tdims%i_end,tdims%j_end ) ::                             &
   true_latitude,   &

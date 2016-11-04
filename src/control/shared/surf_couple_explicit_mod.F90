@@ -729,7 +729,7 @@ ENDIF
         gc_surft,canhc_surft,wt_ext_surft,flake,                              &
         surft_index,surft_pts,tile_frac,fsmc,emis_surft,emis_soil,            &
 !CABLE_LSM:
-        mype, timestep_number, cycleno, numcycles,                            &
+        mype, timestep_number,                                                &
         true_latitude, true_longitude,                                        &
         bexp_gb, hcon_gb,satcon_gb, sathh_gb,                                 &
         soil_alb,                                                             & 

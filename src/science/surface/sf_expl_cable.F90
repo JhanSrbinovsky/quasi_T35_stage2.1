@@ -73,7 +73,7 @@ SUBROUTINE sf_expl_l_cable (                                                    
  n_leaf,n_root,n_stem,lai_bal,gc,canhc_surft,wt_ext_surft,flake,              &
  surft_index,surft_pts,tile_frac,fsmc,emis_surft,emis_soil,                   &
 !CABLE_LSM:
-mype, timestep_number, cycleno, numcycles,                                    &
+mype, timestep_number,                                                        &
 true_latitude, true_longitude,                                                &
 bexp_gb, hcon_gb, satcon_gb, sathh_gb, soil_alb,                              & 
 surf_down_sw_cable, ls_rain_cable, ls_snow_cable,                             &
@@ -728,7 +728,7 @@ REAL(KIND=jprb)               :: zhook_handle
 CHARACTER(LEN=*), PARAMETER :: RoutineName='SF_EXPL_L'
 
 !CABLE_LSM: Passed from surf_couple_
-INTEGER :: mype, timestep_number, cycleno, numcycles
+INTEGER :: mype, timestep_number
 
 REAL,  DIMENSION( tdims%i_end,tdims%j_end ) ::                                 &
   true_latitude,   &
@@ -1113,7 +1113,7 @@ CALL sf_exch_cable (                                                          &
  dtstar_surft,dtstar,rhokh,anthrop_heat_surft,                                &
 !CABLE_LSM:
 mype, timestep_number, cycleno, numcycles,                                    &
-sm_levels,  
+sm_levels,                                                                    & 
 true_latitude, true_longitude,                                                &
 bexp_gb, hcon_gb, satcon_gb, sathh_gb,                                        &
 smvcst, smvcwt, smvccl,                                                       & 

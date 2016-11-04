@@ -56,13 +56,13 @@ SUBROUTINE cable_explicit_main(                                                &
  
   !--- IN ARGS FROM sf_exch_cable, passed from surf_couple_explicit() down ----
    INTEGER ::                                                      & 
-     mype, timestep_number, cycleno, numcycles                         &
+     mype, timestep_number, cycleno, numcycles
    INTEGER ::                                                      & 
       row_length, rows, & ! UM grid resolution
       land_pts,         & ! # of land points being processed
       ntiles,           & ! # of tiles 
       npft,             & ! # of plant functional types
-      sm_levels         & ! # of soil layers 
+      sm_levels          ! # of soil layers 
 
    REAL,  DIMENSION(row_length,rows) ::                             &
       latitude,   &
