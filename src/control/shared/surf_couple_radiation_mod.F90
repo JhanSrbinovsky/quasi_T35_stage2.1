@@ -48,7 +48,9 @@ SUBROUTINE surf_couple_radiation(                                             &
   snow_mass_ij, snow_mass_sea_sicat, di_ncat_sicat, lai_pft, canht_pft,       &
   rgrain_surft, snow_surft, soot_ij, tstar_surft, ho2r2_orog_gb,              &
   !UM-only args: INTENT(OUT)
-  albobs_sc, open_sea_albedo                                                  &
+  albobs_sc, open_sea_albedo,                                                 &
+!CABLE_LSM:
+  surf_down_sw, tile_frac, fland                                              &      
 #endif
   )
 
@@ -77,6 +79,13 @@ USE jules_radiation_mod,      ONLY:                                           &
 USE theta_field_sizes,        ONLY:                                           &
   t_i_length, t_j_length
 
+!CABLE_LSM:
+USE atm_step_local, ONLY : cycleno
+USE atm_fields_real_mod, ONLY : land_alb, soil_alb
+USE lsm_switches_mod,        ONLY: lsm_id
+USE um_parcore,              ONLY : mype
+USE timestep_mod,            ONLY : timestep_number 
+!CABLE_LSM: End
 
 !JULES-only modules
 #if !defined(UM_JULES)
@@ -95,10 +104,6 @@ USE theta_field_sizes,        ONLY:                                           &
     rgrain_surft, snow_surft, soot_ij, tstar_surft
 #endif
 
-!CABLE_LSM:
-USE lsm_switches_mod,        ONLY: lsm_id
-USE um_parcore,              ONLY : mype
-USE timestep_mod,            ONLY : timestep_number 
 
 !Dr Hook
 USE parkind1,                 ONLY:                                           &
@@ -218,6 +223,12 @@ REAL, INTENT(IN)    ::                                                        &
   wavelength_short(n_band),                                                   &
   wavelength_long(n_band)
 
+!CABLE_LSM: 4-band SW required to compute albedo
+REAL, INTENT(IN) ::                                                           &
+  surf_down_sw(row_length,rows,4),                                            &
+  tile_frac(land_pts,ntype),                                                 &
+  fland(land_pts)
+   
 !Misc INTENT(OUT)
 REAL, INTENT(OUT) ::                                                          &
   sea_ice_albedo(row_length,rows,4)   !Surface Albedo for sea ice
@@ -246,7 +257,8 @@ REAL, INTENT(OUT) ::                                                          &
   REAL(KIND=jprb)               :: zhook_handle
 
   CHARACTER(LEN=*), PARAMETER :: RoutineName='SURF_COUPLE_RADIATION'
-
+!CABLE_LSM:
+  LOGICAL, SAVE :: first_call = .true.
 !-----------------------------------------------------------------------------
 !End of header
 
@@ -334,8 +346,8 @@ REAL, INTENT(OUT) ::                                                          &
         z0_surft,ho2r2_orog_gb,                                               &
         alb_surft, land_albedo, albobs_sc,                                    &
         !CABLE_LSM:
-        mype, timestep_number                                                 &  
-        )
+        mype, timestep_number, cycleno, row_length, rows,                     &
+        fland, surf_down_sw, cosz_gb, soil_alb, land_alb )
 
 
     CASE DEFAULT

@@ -19,7 +19,7 @@
 !
 ! Purpose:
 !
-! Called from: JULES: surf_couple_ pathway
+! Called from: JULES: surf_couple_radiation, tile_albedo_cable
 !
 ! Contact: Jhan.Srbinovsky@csiro.au
 !
@@ -32,12 +32,30 @@ module cable_rad_main_mod
   
 contains
 
-SUBROUTINE cable_rad_main( mype, timestep_number ) 
-  
+SUBROUTINE cable_rad_main( cycleno, row_length, rows, land_pts, ntiles,        &
+              tile_frac, fland, surf_down_sw, cosine_zenith_angle, snow_tile,             &
+              soil_alb, land_albedo, alb_surft, land_alb )
+          !cable% snow_temp, 
+          !cable% snow_avg_rho,                  &
+          !cable% soil_temp, 
+          !cable% snow_flg,&
+
   implicit none
  
-  !--- IN ARGS FROM tile_albedo_cable, passed from surf_couple_rad() down ----
-  integer :: mype, timestep_number
+  !--- IN ARGS FROM surf_couple_radiation() ------------------------------------
+  
+  integer :: cycleno                      ! ENDGAME cycle number
+  integer :: row_length, rows, land_pts, ntiles ! grid
+  real :: surf_down_sw(row_length,rows,4) ! 4-band ShortWave forcing
+  real :: tile_frac(land_pts,ntiles)      ! surface type fraction 
+  real :: fland(land_pts)                 ! land fraction 
+  real :: cosine_zenith_angle(row_length,rows)        ! cosine_zenith_angle          
+  real :: snow_tile(land_pts,ntiles)     ! formerly snow tile        
+  real :: soil_alb(land_pts)              ! Snow-free, bare soil albedo: 
+  real :: land_albedo(row_length,rows,4) 
+  real :: alb_surft(Land_pts,ntiles,4)
+  real :: land_alb(row_length,rows)         ! Mean land_albedo
+
   !--- End IN ARGS  -----------------------------------------------------------
 
   !--- declare local vars ------------------------------------------------------ 
@@ -64,6 +82,9 @@ SUBROUTINE cable_rad_main( mype, timestep_number )
   !--- args PACKED to force CABLE
   !----------------------------------------------------------------------------
   
+  !call cable_rad_driver( cycleno, row_length, rows, land_pts, ntiles,        &
+  !            tile_frac, fland, surf_down_sw, cosine_zenith_angle, snow_tile,             &
+  !            soil_alb, land_albedo, alb_surft, land_alb )
   
   !----------------------------------------------------------------------------
   !----------------------------------------------------------------------------
