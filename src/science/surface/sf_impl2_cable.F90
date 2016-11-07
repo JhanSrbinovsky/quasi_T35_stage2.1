@@ -48,6 +48,8 @@ SUBROUTINE sf_impl2_cable (                                                     
  tauy_ssi_star,ecan_surft,ei,ei_sice,esoil,ext,snowmelt,melt_surft,           &
  rhokh_mix,error,                                                             &
  mype, timestep_number  & ! CABLE_LSM:                                          &
+ ls_rain_cable, ls_snow_cable,                                         &
+ conv_rain_cable, conv_snow_cable                                          &
  )
 
 USE csigma,                   ONLY:                                           &
@@ -477,6 +479,13 @@ INTEGER             ::                                                        &
  timestep_number
             ! IN experiment timestep number
 
+REAL, DIMENSION(:,:), POINTER :: &
+  ls_rain_cable,    &
+  ls_snow_cable,    &
+  conv_rain_cable,    &
+  conv_snow_cable
+
+! CABLE_LSM: End
 !--------------------------------------------------------------------
 !  Outputs :-
 !-1 Diagnostic (or effectively so - includes coupled model requisites):-
@@ -782,6 +791,69 @@ IF ( .NOT. l_correct ) THEN
 !-----------------------------------------------------------------------
 !CABLE_LSM:
 CALL cable_implicit_main( mype, timestep_number )
+
+ call cable_implicit_driver( & 
+        ls_rain_cable, conv_rain_cable,                                       &
+        ls_snow_cable, conv_snow_cable,                                       &
+                  dtl1_1,  &
+                  dqw1_1,  &
+                  T_SOIL, &
+                  cable% progs% soil_temp,   &
+                  cable% Cout% smcl, &
+                  cable% progs% soil_moist,                    &
+                  !this local vn could actually be timestep no etc. check
+                  !cable% grid% timestep_width, &
+                  timestep, &
+                  cable% soil_param%SMVCST, &
+                  cable% Cout% STHF,&
+                  cable% progs% soil_froz_frac, &
+                  cable% Cout% STHU,&
+                  cable% progs% STHU_TILE, &
+                  snow_tile,   & !land_pts, ntiles  
+                  cable% progs% snow_avg_rho, cable% progs% snow_flg,          &
+                  cable% progs% snow_dpth,    cable% progs% snow_mass,       &
+                  cable% progs% snow_rho,     cable% progs% snow_temp,          &
+                  cable% progs% snow_cond, &
+                  FTL_1,                   &
+                  FTL_TILE, &
+                  FQW_1, &
+                  FQW_TILE,  &
+                  TSTAR_TILE, &
+                  SURF_HT_FLUX_LAND,         &
+                  ECAN_TILE, ESOIL_TILE,                 &
+                  EI_TILE, RADNET_TILE,                  &
+!where can i ge these from
+!make this a Cout var
+!cable% um% TOT_ALB,  &
+                  cable% progs% SNOW_AGE,                 &
+!check that this is the same canopy as is available locally
+!cable% um% CANOPY, &
+CANOPY, &
+                  cable% Cout% GS,                            &
+                  sf_diag% T1P5M_TILE, sf_diag% Q1P5M_TILE,       &
+                  cable% force% CANOPY_GB, &
+                  Fland,                      &
+                  MELT_TILE, &
+                  cable% grid% DIM_CS1, cable% grid% DIM_CS2,                  & 
+                  !where can i ge these from
+                  !we can get these from atmos_ph....2
+                  cable% Cout% NPP,                          &
+                  cable% Cout% NPP_FT, cable% Cout% GPP,                           &
+                  cable% Cout% GPP_FT, cable% Cout% RESP_S,                         &
+                  cable% Cout% RESP_S_TOT, cable% Cout% RESP_S_TILE,                &
+                  cable% Cout% RESP_P, cable% Cout% RESP_P_FT,                      &
+                  cable% Cout% G_LEAF, &
+                  !
+                  !
+                  !we can get these from atmos_ph....2
+                  !cable% Cout% SNOW_depth, & !rowlwngth, rows
+                  !cable% Cout% LYING_SNOW, & !land_pts
+                  !cable% Cout% surf_roff, &
+                  !cable% Cout% sub_surf_roff, &
+                  !cable% Cout% tot_tfall,&
+                  tl_1, qw_1,&
+                  SURF_HTF_TILE &
+                  )
 
 !-----------------------------------------------------------------------
 ! Optional error check : test for negative top soil layer temperature

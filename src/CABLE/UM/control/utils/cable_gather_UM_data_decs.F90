@@ -7,9 +7,6 @@ module cable_gather_UM_data_decs
     conv_rain_cable,    &
     conv_snow_cable
 
-   REAL, DIMENSION(:,:,:), pointer :: &
-    surf_down_sw_cable
-      
 End module cable_gather_UM_data_decs
 
 

@@ -115,11 +115,11 @@ SUBROUTINE surf_couple_implicit(                                              &
   USE c_gamma, ONLY :                                                         &
      gamma
 #endif
+
 !CABLE_LSM:
-  USE lsm_switches_mod,        ONLY: lsm_id
-  USE um_parcore,              ONLY : mype
-  USE timestep_mod,            ONLY : timestep_number 
-  
+USE cable_gather_um_data_decs, ONLY:                                          & 
+  ls_rain_cable, ls_snow_cable
+
   USE parkind1, ONLY: jprb, jpim
   USE yomhook, ONLY: lhook, dr_hook
 
@@ -477,6 +477,7 @@ INTEGER, INTENT(OUT) ::                                                       &
 ! Temp until the model switching is implemented
 ! Having a parameter until then should hopefully help the compiler eliminate
 ! dead code
+  CHARACTER(len=8), PARAMETER :: lsm_id = 'jules'
   INTEGER :: i,j,n
 
   !Dr Hook variables
@@ -595,7 +596,7 @@ INTEGER, INTENT(OUT) ::                                                       &
     CASE( 'cable' )
 
 ! DEPENDS ON: sf_impl2_cable
-      CALL sf_impl2_cable (                                                         &
+      CALL sf_impl2_cable (                                                   &
 ! IN values defining field dimensions and subset to be processed :
         land_pts,land_index,nice,nice_use,nsurft,surft_index,surft_pts,       &
         sm_levels,canhc_surft,canopy_surft,flake,smc_gb,tile_frac,            &
@@ -630,7 +631,10 @@ INTEGER, INTENT(OUT) ::                                                       &
         taux_1,tauy_1,taux_land_star,tauy_land_star,taux_ssi_star,            &
         tauy_ssi_star,ecan_surft,ei,ei_sice,esoil,ext,snowmelt,melt_surft,    &
         rhokh_mix,error,                                                      &
-        mype, timestep_number  & ! CABLE_LSM:                                   &
+        ! CABLE_LSM:                                                           
+        mype, timestep_number,                                                & 
+        ls_rain_cable, ls_snow_cable,                                         &
+        ls_rain_cable, ls_snow_cable                                          &
       )
 
       !Only call on the second pass through implicit
@@ -680,6 +684,7 @@ INTEGER, INTENT(OUT) ::                                                       &
         END IF
 
       END IF !l_correct
+
 
 
     CASE DEFAULT
