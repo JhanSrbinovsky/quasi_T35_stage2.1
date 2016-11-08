@@ -117,8 +117,18 @@ SUBROUTINE surf_couple_implicit(                                              &
 #endif
 
 !CABLE_LSM:
+USE lsm_switches_mod,        ONLY: lsm_id
+USE um_parcore,              ONLY : mype
+USE timestep_mod,            ONLY : timestep_number 
+USE atm_step_local, ONLY : cycleno
+USE dynamics_input_mod, ONLY : numcycles
+USE jules_surface_types_mod,  ONLY: npft
+USE prognostics, ONLY :                                                     &
+    canopy_gb !
 USE cable_gather_um_data_decs, ONLY:                                          & 
-  ls_rain_cable, ls_snow_cable
+  ls_rain_cable, ls_snow_cable,                                               &
+  conv_rain_cable, conv_snow_cable
+USE atm_fields_real_mod, ONLY : smcl  
 
   USE parkind1, ONLY: jprb, jpim
   USE yomhook, ONLY: lhook, dr_hook
@@ -477,7 +487,6 @@ INTEGER, INTENT(OUT) ::                                                       &
 ! Temp until the model switching is implemented
 ! Having a parameter until then should hopefully help the compiler eliminate
 ! dead code
-  CHARACTER(len=8), PARAMETER :: lsm_id = 'jules'
   INTEGER :: i,j,n
 
   !Dr Hook variables
@@ -632,9 +641,15 @@ INTEGER, INTENT(OUT) ::                                                       &
         tauy_ssi_star,ecan_surft,ei,ei_sice,esoil,ext,snowmelt,melt_surft,    &
         rhokh_mix,error,                                                      &
         ! CABLE_LSM:                                                           
-        mype, timestep_number,                                                & 
-        ls_rain_cable, ls_snow_cable,                                         &
-        ls_rain_cable, ls_snow_cable                                          &
+        mype, timestep_number,cycleno, numcycles, npft,                       & 
+        flandg,&
+        flandg,&
+        flandg,&
+        flandg, &
+        !ls_rain_cable, ls_snow_cable,                                         &
+        !conv_rain_cable, conv_snow_cable                                      &
+        canopy_gb, &
+        smcl &
       )
 
       !Only call on the second pass through implicit

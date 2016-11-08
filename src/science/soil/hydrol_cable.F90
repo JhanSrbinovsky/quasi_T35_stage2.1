@@ -16,11 +16,11 @@
 ! Documentation : UM Documentation Paper 25
 
 ! Subroutine Interface:
-MODULE hydrol_mod
+MODULE hydrol_mod_cable
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: ModuleName='HYDROL_MOD'
 
 CONTAINS
-SUBROUTINE hydrol (                                                           &
+SUBROUTINE hydrol_cable (                                                           &
                    lice_pts,lice_index,soil_pts,soil_index,                   &
                    nsnow,                                                     &
                    npnts,nshyd,b,can_cpy,con_rain,                            &
@@ -47,8 +47,9 @@ SUBROUTINE hydrol (                                                           &
                    zw,sthzw,a_fsat,c_fsat,a_fwet,c_fwet,                      &
                    resp_s,npp,fch4_wetl,                                      &
                    fch4_wetl_cs,fch4_wetl_npp,fch4_wetl_resps,                &
-                   dim_cs1,l_soil_sat_down,l_triffid)
-
+                   dim_cs1,l_soil_sat_down,l_triffid,                         &
+                   mype, timestep_number                                      &
+                  )
 USE jules_hydrology_mod, ONLY :                                               &
  l_wetland_unfrozen                                                           &
 ,ti_max                                                                       &
@@ -75,6 +76,9 @@ USE c_densty, ONLY :                                                          &
    rho_water  !  density of pure water (kg/m3)
 
 USE jules_surface_mod, ONLY: sorp
+
+!CABLE_LSM:
+USE cable_hyd_main_mod, ONLY : cable_hyd_main
 
 USE parkind1, ONLY: jprb, jpim
 USE yomhook, ONLY: lhook, dr_hook
@@ -225,6 +229,9 @@ REAL, INTENT(INOUT) ::                                                        &
 ,zw(npnts)                                                                    &
                       ! INOUT Water table depth (m).
 ,sthzw(npnts)         ! INOUT soil moist fract. in deep-zw layer.
+
+!CABLE_LSM:
+INTEGER :: mype, timestep_number
 
 !   Array arguments with intent(OUT) :
 REAL, INTENT(OUT) ::                                                          &
@@ -382,6 +389,10 @@ zdepth(:)=0.0
 DO n=1,nshyd
    zdepth(n)=zdepth(n-1)+dzsoil(n)
 END DO
+
+!CABLE_LSM:
+call cable_hyd_main(mype, timestep_number)
+
 !-----------------------------------------------------------------------
 ! Calculate throughfall and surface runoff, and update the canopy water
 ! content
@@ -722,5 +733,5 @@ ENDIF
 !-----------------------------------------------------------------------
 IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_out,zhook_handle)
 RETURN
-END SUBROUTINE hydrol
-END MODULE hydrol_mod
+END SUBROUTINE hydrol_cable
+END MODULE hydrol_mod_cable

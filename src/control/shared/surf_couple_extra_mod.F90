@@ -129,6 +129,12 @@ USE trif_vars_mod,            ONLY: frac_past_gb
      l_snow_albedo
   USE um_parcore,               ONLY:                                         &
      mype
+
+!CABLE_LSM:
+USE hydrol_mod_cable,        ONLY : hydrol_cable
+USE lsm_switches_mod,        ONLY : lsm_id
+USE timestep_mod,            ONLY : timestep_number 
+
   USE p_s_parms,                ONLY:                                         &
      ! To avoid clash with non _levs versions
      clapp_levs  => bexp_gb,                                                  &
@@ -660,6 +666,8 @@ timestep = REAL(timestep_len)
 trad(:) = 0.0
 #endif
 
+  SELECT CASE( lsm_id )
+    CASE( 'jules' )
 ! ----------------------------------------------------------------------
 ! Section HYD.1 Compress fields to land points, then call hydrology.
 ! ----------------------------------------------------------------------
@@ -1111,8 +1119,465 @@ IF (model_type /= mt_single_column) THEN
   END IF
 END IF
 #endif
-!CABLE_LSM: put hydrology call here on CASE SELECT lsm_id='cable' switch
-!CABLE_LSM: reconcile where to place call previously in hydrol.F90 (1.3)
+     CASE( 'cable' )
+! ----------------------------------------------------------------------
+! Section HYD.1 Compress fields to land points, then call hydrology.
+! ----------------------------------------------------------------------
+
+IF (l_hydrology .AND. land_pts /= 0 ) THEN
+! Inland basin outflow is added to soil moisture at each timestep.
+! This flux changes its value only when the river routing scheme
+! has been called in the previous timestep
+
+#if defined(UM_JULES)
+  IF(l_rivers)THEN
+    !Pass inland flow to soil moisture every timestep
+    IF  (.NOT. l_inland) THEN
+      inlandout_atmos = 0.0
+      inlandout_riv   = 0.0
+    END IF
+  END IF  ! l_rivers
+#endif
+
+  !Compress fields to land points
+  DO l = 1, land_pts
+    j = (land_index(l)-1)/row_length + 1
+    i = land_index(l) - (j-1)*row_length
+    ls_rain_land(l)    = ls_rain(i,j)
+    con_rain_land(l)   = con_rain(i,j)
+    con_snow_land(l)   = con_snow(i,j)
+    ls_snow_land(l)    = ls_snow(i,j)
+
+#if defined(UM_JULES)
+    surf_ht_flux_ld(l) = surf_ht_flux_land(i,j)
+    lying_snow(l)      = snow_depth(i,j)
+    snow_melt(l)       = snowmelt(i,j)
+#endif
+
+    !pass jules the modelled rain fractions
+    IF (l_var_rainfrac) THEN
+
+#if defined(UM_JULES)
+      con_rainfrac_land(l) = MIN(cca_2d(i,j),0.5)  !As in diagnostics_conv
+#endif
+      !provide some safety checking for convective rain with no CCA
+      IF (con_rainfrac_land(l) == 0.0 .AND. con_rain_land(l) > 0.0) THEN
+        con_rainfrac_land(l) = confrac
+      !and for very small CCA amounts
+      ELSE IF (con_rainfrac_land(l) < 0.01 .AND. con_rain_land(l) > 0.0) THEN
+        con_rainfrac_land(l) = 0.01
+      END IF
+
+      !provide some safety checking for ls rain with no rainfrac
+      IF (ls_rainfrac_land(l) == 0.0 .AND. ls_rain_land(l) > 0.0) THEN
+        ls_rainfrac_land(l) = 0.5
+      !and for very small rainfrac amounts
+      ELSE IF (ls_rainfrac_land(l) < 0.01 .AND. ls_rain_land(l) > 0.0) THEN
+        ls_rainfrac_land(l) = 0.01
+      END IF
+
+    ELSE
+      !use original default values
+      con_rainfrac_land(l) = confrac
+      ls_rainfrac_land(l) = 1.0
+    END IF
+  END DO !land_pts
+
+!-------------------------------------------------------------------------------
+!   Snow processes.
+!-------------------------------------------------------------------------------
+  CALL snow ( land_pts,timestep,smlt,nsurft,surft_pts,                        &
+              surft_index,catch_snow_surft,con_snow_land,con_rain_land,       &
+              tile_frac,ls_snow_land,ls_rain_land,                            &
+              ei_surft,hcap_levs(:,1),hcons,melt_surft,                       &
+              soil_layer_moisture(:,1),sthf_gb(:,1),surf_htf_surft,           &
+              t_soil_gb(:,1),tsurf_elev_surft,                                &
+              tstar_surft,smvcst_levs(:,1),rgrain_surft,rgrainl_surft,        &
+              rho_snow_grnd_surft,                                            &
+              sice_surft,sliq_surft,snow_grnd_surft,snow_surft,               &
+              snowdepth_surft, tsnow_surft,nsnow_surft,ds_surft,              &
+              snomlt_surf_htf,lying_snow,rho_snow_surft,snomlt_sub_htf,       &
+              snow_melt,snow_soil_htf,surf_ht_flux_ld,snow_smb_surft,         &
+              dhf_surf_minus_soil )
+
+!-------------------------------------------------------------------------------
+!   Land hydrology.
+!-------------------------------------------------------------------------------
+
+! Calculate soil carbon for use in the wetland CH4 scheme only
+! (only used if TRIFFID is switched off):
+#if !defined(UM_JULES)
+  DO j=1,soil_pts
+    i=soil_index(j)
+      cs_ch4(i)=cs_pool_gb(i,1)
+  ENDDO
+#endif
+
+  CALL hydrol_cable (                                                         &
+               lice_pts,lice_index,soil_pts,soil_index,nsnow_surft,           &
+               land_pts,sm_levels,clapp_levs,catch_surft,con_rain_land,       &
+               ecan_surft,ext,hcap_levs,hcon_levs,ls_rain_land,               &
+               con_rainfrac_land, ls_rainfrac_land,                           &
+               satcon_levs,sathh_levs,snowdepth_surft,snow_soil_htf,          &
+               surf_ht_flux_ld,timestep,                                      &
+               smvcst_levs,smvcwt_levs,canopy_surft,                          &
+               stf_sub_surf_roff,soil_layer_moisture,sthf_gb,sthu_gb,         &
+               t_soil_gb,tsurf_elev_surft,canopy_gb,smc_gb,snow_melt,         &
+               sub_surf_roff,surf_roff,tot_tfall,                             &
+               inlandout_atm_gb,l_inland,nsurft,surft_pts,surft_index,        &
+               infil_surft,melt_surft,tile_frac,                              &
+               l_top,l_pdm,fexp_gb,gamtot_gb,ti_mean_gb,ti_sig_gb,            &
+               cs_ch4,cs_pool_gb,                                             &
+               dun_roff_gb,drain_gb,fsat_gb,fwetl_gb,qbase_gb,qbase_zw_gb,    &
+               zw_gb,sthzw_gb,a_fsat_gb,c_fsat_gb,a_fwet_gb,c_fwet_gb,        &
+               resp_s_gb,npp_gb,fch4_wetl_gb,                                 &
+               fch4_wetl_cs_gb,fch4_wetl_npp_gb,fch4_wetl_resps_gb,           &
+               dim_cs1,l_soil_sat_down,l_triffid,                             &
+               mype, timestep_number  & !CABLE_LSM:                           & 
+              )  
+
+!-------------------------------------------------------------------------------
+!   Reset snowmelt over land points.
+!-------------------------------------------------------------------------------
+  !Copy land points output back to full fields array.
+  DO l = 1, land_pts
+    j=(land_index(l)-1)/row_length + 1
+    i=land_index(l) - (j-1)*row_length
+#if defined(UM_JULES)
+    snow_depth(i,j) = lying_snow(l)
+#else
+    snow_mass_ij(i,j) = lying_snow(l)
+#endif
+    snowmelt(i,j) = snow_melt(l)
+  END DO
+
+END IF ! ( l_hydrology .AND. land_pts /= 0 )
+
+!-------------------------------------------------------------------
+! RIVER ROUTING
+!-------------------------------------------------------------------
+IF ( l_rivers ) THEN
+#if defined(UM_JULES)
+  CALL river_control(                                                         &
+    !LOGICAL, INTENT(IN)
+    invert_ocean,                                                             &
+    !INTEGER, INTENT(IN)
+    n_proc, land_pts, row_length, rows, river_row_length, river_rows,         &
+    land_index, ntype, i_river_vn, aocpl_row_length, aocpl_p_rows, g_p_field, &
+    g_r_field, mype, global_row_length, global_rows, global_river_row_length, &
+    global_river_rows, halo_i, halo_j, model_levels, nsurft,                  &
+    !REAL, INTENT(IN)
+    fqw_surft, delta_lambda, delta_phi, xx_cos_theta_latitude,                &
+    xpa, xua, xva, ypa, yua, yva, flandg, river_vel, river_mcoef, trivdir,    &
+    trivseq, r_area, slope, flowobs1, r_inext, r_jnext, r_land, substore,     &
+    surfstore, flowin, bflowin, smvcst_levs, smvcwt_levs,                     &
+    surf_roff, sub_surf_roff, frac_surft,                                     &
+    !INTEGER, INTENT(INOUT)
+    a_steps_since_riv,                                                        &
+    !REAL, INTENT(INOUT)
+    tot_surf_runoff, tot_sub_runoff, acc_lake_evap, twatstor,                 &
+    soil_layer_moisture, sthu_gb,                                             &
+    !LOGICAL, INTENT(OUT)
+    trip_call,                                                                &
+    !REAL, INTENT(OUT)
+    inlandout_atm_gb, inlandout_atmos, inlandout_riv, riverout, box_outflow,  &
+    box_inflow                                                                &
+    )
+#else
+  CALL river_control( land_pts,sub_surf_roff                                  &
+                             ,surf_roff,srflow,srrun,rflow,rrun)
+#endif
+END IF ! l_rivers (ATMOS)
+
+#if !defined(UM_JULES)
+!-------------------------------------------------------------------------------
+!   Calculate irrigation demand and planting dates if required
+!-------------------------------------------------------------------------------
+IF( l_irrig_dmd ) THEN
+
+! calculate maximum dvi per grid cell
+  IF ( irr_crop == 2 ) THEN
+    DO l=1,land_pts
+      dvimax_gb(l) = MAXVAL(dvi_cpft(l,:))
+    END DO
+  END IF
+
+  CALL irrig_dmd(land_pts, sm_levels, frac_irr_surft, a_step, plant_n_gb,     &
+                 sthf_gb, smvccl_gb, smvcst_levs, smvcwt_levs, sthzw_gb,      &
+                 sthu_irr_gb, sthu_gb,                                        &
+                 soil_layer_moisture, irr_crop, dvimax_gb)
+
+  IF( irr_crop == 1 ) THEN
+    CALL calc_crop_date(land_index, land_pts, t_i_length, t_j_length, nsurft, &
+                        frac_surft, sw_surft, tstar_surft, lw_down, tl_1,     &
+                        con_rain, ls_rain, con_snow, ls_snow,                 &
+                        plant_n_gb, nday_crop)
+  END IF
+
+  IF ( l_irrig_limit ) THEN
+    CALL adjust_routestore()
+  END IF
+ELSE
+! if .not. l_irrig_dmd, set sthu_irr_gb to 0.0 in case it is still reported
+  sthu_irr_gb(:,:) = 0.0
+END IF ! l_irrig_dmd
+
+
+!-------------------------------------------------------------------------------
+! Run crop code if required
+!-------------------------------------------------------------------------------
+IF ( l_crop ) THEN
+  crop_call = MOD ( FLOAT(a_step),                                            &
+                    REAL(crop_period) * REAL(secs_in_day) / timestep )
+
+  DO n=1,ncpft
+    DO l=1,land_pts
+      npp_acc_pft(l,nnpft+n) = npp_acc_pft(l,nnpft+n)                         &
+                            + (npp_pft(l,nnpft+n) * timestep)
+    END DO
+  END DO
+
+  CALL photoperiod(p_field, phot, dphotdt)
+
+  CALL crop(p_field, land_pts, land_index, a_step,                            &
+            crop_call, sm_levels, frac_surft, phot, dphotdt,                  &
+            sf_diag%t1p5m_surft, t_soil_gb, sthu_gb, satcon_levs, smvccl_gb,  &
+            smvcst_levs, npp_acc_pft,                                         &
+            canht_pft, lai_pft, dvi_cpft, rootc_cpft, harvc_cpft,             &
+            reservec_cpft, croplai_cpft, cropcanht_cpft,                      &
+            catch_surft, infil_surft, z0_surft)
+END IF  ! l_crop
+
+!------------------------------------------------------------------------------
+!   Update metstats for this timestep
+!-------------------------------------------------------------------------------
+IF ( l_metstats ) THEN
+  !Compress variables to land points as metstats has no knowledge of
+  !i and j. Also use a TYPE to keep the argument list short
+  DO l = 1, land_pts
+    j = ( land_index(l)-1 ) / t_i_length + 1
+    i = land_index(l) - (j-1) * t_i_length
+    metstats_input(l)%temp     = tl_1(i,j)
+    metstats_input(l)%spec_hum = qw_1(i,j)
+    metstats_input(l)%wind_u   = u_1(i,j)
+    metstats_input(l)%wind_v   = v_1(i,j)
+    metstats_input(l)%ls_rain  = ls_rain(i,j)
+    metstats_input(l)%con_rain = con_rain(i,j)
+    metstats_input(l)%ls_snow  = ls_snow(i,j)
+    metstats_input(l)%con_snow = con_snow(i,j)
+    metstats_input(l)%press    = pstar(i,j)
+  END DO
+
+  CALL metstats_timestep(metstats_input,metstats_prog,                        &
+       !Things that really ought to come in via USE but won't work with the UM
+                         current_time%time, timestep,land_pts)
+END IF
+
+!-------------------------------------------------------------------------------
+!   Call to fire module
+!-------------------------------------------------------------------------------
+IF ( l_fire ) THEN
+  CALL fire_timestep(metstats_prog, smc_gb, fire_prog, fire_diag,             &
+       !Things that really ought to come in via USE but won't work with the UM
+                     current_time%time, current_time%month, timestep, land_pts)
+END IF
+#endif
+
+#if !defined(UM_JULES)
+!-------------------------------------------------------------------------------
+!   Call to INFERNO (interactive fire module)
+!-------------------------------------------------------------------------------
+IF ( l_inferno ) THEN
+   CALL inferno_io( sf_diag%t1p5m_surft, sf_diag%q1p5m_surft, pstar, sthu_gb, &
+                    sm_levels,                                                &
+                    frac_surft, dim_cs1, cs_ch4, canht_pft, ls_rain, con_rain,&
+                    land_pts, ignition_method)
+END IF
+#endif
+
+! ----------------------------------------------------------------------
+! Section 19 -- VEGETATION DYNAMICS
+! ----------------------------------------------------------------------
+
+! initialize carbon conservation diagnostics
+! otherwise they can be non-zero on non-triffid timesteps
+IF ( l_triffid ) THEN
+  DO l = 1, land_pts
+    cnsrv_carbon_veg2_gb(l) = 0.0
+    cnsrv_carbon_triffid_gb(l) = 0.0
+    cnsrv_veg_triffid_gb(l) = 0.0
+    cnsrv_soil_triffid_gb(l) = 0.0
+    cnsrv_prod_triffid_gb(l) = 0.0
+  END DO
+ENDIF
+
+#if defined(UM_JULES)
+!change 2d to 1d soil clay content for soil respiration
+IF ( l_triffid ) THEN
+  DO l = 1, land_pts
+    j = (land_index(l)-1)/row_length + 1
+    i = land_index(l) - (j-1)*row_length
+    clay_gb(l) = soil_clay_ij(i,j)
+  ENDDO
+ENDIF
+#endif
+
+!-------------------------------------------------------------------------
+!   If leaf phenology is activated, check whether the atmosphere model
+!   has run an integer number of phenology calling periods.
+!-------------------------------------------------------------------------
+#if defined(UM_JULES)
+
+IF (l_phenol .OR. l_triffid) THEN
+  CALL veg_control(                                                           &
+    land_pts, land_index, nsurft, can_model,                                  &
+    a_step, asteps_since_triffid,                                             &
+    land_pts_trif, npft_trif,                                                 &
+    phenol_period, triffid_period, row_length, rows,                          &
+    l_phenol, l_triffid, l_trif_eq,                                           &
+    timestep, frac_disturb, frac_past_gb, satcon_levs,                        &
+    g_leaf_acc_pft, g_leaf_phen_acc_pft, npp_acc_pft,                         &
+    resp_s_acc_gb, resp_w_acc_pft,                                            &
+    cs_pool_gb, frac_surft, lai_pft, clay_gb, z0m_soil_gb, canht_pft,    &
+    catch_snow_surft, catch_surft, infil_surft, z0_surft, z0h_bare_surft,     &
+    c_veg_pft, cv_gb, lit_c_pft, lit_c_mn_gb, g_leaf_day_pft, g_leaf_phen_pft,&
+    lai_phen_pft, g_leaf_dr_out_pft, npp_dr_out_pft, resp_w_dr_out_pft,       &
+    resp_s_dr_out_gb                                                          &
+     )
+END IF
+#else
+phenol_call=1
+triffid_call=1
+IF ( l_phenol ) phenol_call = MOD ( FLOAT(a_step),                            &
+            REAL(phenol_period) * REAL(secs_in_day) / timestep )
+
+IF ( l_triffid ) THEN
+  nstep_trif = INT( REAL(secs_in_day) * REAL(triffid_period) / timestep )
+  IF ( asteps_since_triffid == nstep_trif ) triffid_call = 0
+ENDIF
+
+IF ( triffid_call == 0 ) THEN
+!-------------------------------------------------------------------------------
+!     Run includes dynamic vegetation
+!-------------------------------------------------------------------------------
+  CALL veg2( land_pts, land_index, nsurft, can_model                          &
+            ,a_step, asteps_since_triffid                                     &
+            ,phenol_period, triffid_period, l_phenol, l_triffid, l_trif_eq    &
+            ,timestep, frac_agr_gb, frac_past_gb, satcon_levs                 &
+            ,g_leaf_acc_pft, g_leaf_phen_acc_pft, npp_acc_pft                 &
+            ,resp_s_acc_gb, resp_w_acc_pft                                    &
+            ,cs_pool_gb, frac_surft, lai_pft, clay_gb, z0m_soil_gb            &
+            ,canht_pft, catch_snow_surft, catch_surft, infil_surft, z0_surft  &
+            ,z0h_bare_surft, c_veg_pft, cv_gb, lit_c_pft, lit_c_mn_gb         &
+            ,g_leaf_day_pft, g_leaf_phen_pft, lai_phen_pft, g_leaf_dr_out_pft &
+            ,npp_dr_out_pft, resp_w_dr_out_pft, resp_s_dr_out_gb )
+
+ELSE
+
+  IF ( phenol_call == 0 )                                                     &
+!-------------------------------------------------------------------------------
+!       Run includes phenology,  but not dynamic vegetation
+!       therefore call veg1 rather than veg2
+!-------------------------------------------------------------------------------
+    CALL veg1( land_pts, nsurft, can_model, a_step, phenol_period, l_phenol   &
+              ,timestep, satcon_levs, z0m_soil_gb, g_leaf_acc_pft, frac_surft &
+              ,lai_pft,  canht_pft                                            &
+              ,catch_snow_surft, catch_surft, infil_surft, z0_surft           &
+              ,z0h_bare_surft                                                 &
+              ,g_leaf_day_pft, g_leaf_phen_pft, g_leaf_phen_acc_pft           &
+              ,lai_phen_pft )
+
+ENDIF  !  triffid_call
+
+IF (l_fao_ref_evapotranspiration) THEN
+   trad = ( tiles_to_gbm(tstar_surft**4) )**0.25
+   CALL fao_ref_evapotranspiration(soil_pts, soil_index,                      &
+     land_pts, land_index, sf_diag%t1p5m,                                     &
+     sw_down_ij, lw_down_ij, surf_ht_flux_ij, sf_diag%u10m,                   &
+     sf_diag%v10m, sf_diag%q1p5m, pstar_ij, trad, fao_et0)
+END IF
+
+#endif
+
+!------------------------------------------------------------------------------
+!Call STASH diagnostic routines - UM-only
+!------------------------------------------------------------------------------
+#if defined(UM_JULES)
+IF (model_type /= mt_single_column) THEN
+  IF (l_hydrology .AND. sf(0,8) ) THEN
+!DEPENDS ON: diagnostics_hyd
+    CALL diagnostics_hyd(                                                     &
+      row_length, rows, model_levels,                                         &
+      n_rows, global_row_length, global_rows,                                 &
+      halo_i, halo_j, offx, offy, mype,                                       &
+      n_proc, n_procx, n_procy,                                               &
+      g_rows, g_row_length,                                                   &
+      at_extremity,                                                           &
+      land_pts, sm_levels,                                                    &
+      !Put inland basin outflow in call to diagriv
+      land_index,inlandout_atm_gb,                                            &
+      smc_gb, surf_roff, sub_surf_roff,                                       &
+      lying_snow, snow_melt,                                                  &
+      canopy_gb,t_soil_gb,                                                    &
+      tsurf_elev_surft,snow_soil_htf,snow_smb_surft,                          &
+      soil_layer_moisture,                                                    &
+      nsurft, snomlt_surf_htf, sthu_gb, sthf_gb,                              &
+      tot_tfall, snow_surft, melt_surft,                                      &
+      rgrain_surft, land_sea_mask,                                            &
+      dun_roff_gb, drain_gb, qbase_gb, qbase_zw_gb,                           &
+      fch4_wetl_gb,fch4_wetl_cs_gb,fch4_wetl_npp_gb,                          &
+      fch4_wetl_resps_gb,                                                     &
+      fexp_gb,gamtot_gb,ti_mean_gb,ti_sig_gb,                                 &
+      fsat_gb,fwetl_gb,zw_gb,sthzw_gb,                                        &
+      timestep,                                                               &
+      STASHwork8                                                              &
+      )
+  END IF
+
+  IF ( l_rivers .AND. trip_call .AND. sf(0,26) ) THEN
+
+    CALL diagnostics_riv(                                                     &
+      row_length, rows,                                                       &
+      river_row_length, river_rows,                                           &
+      at_extremity,                                                           &
+      at_extremity,                                                           &
+      riverout,                                                               &
+      box_outflow, box_inflow,                                                &
+      !Put inland basin outflow in call to diagriv
+      twatstor,inlandout_riv,                                                 &
+      STASHwork26                                                             &
+      )
+  END IF
+
+  IF (sf(0,19)) THEN
+! DEPENDS ON: diagnostics_veg
+    CALL diagnostics_veg(                                                     &
+      row_length, rows, n_rows,                                               &
+      global_row_length, global_rows,                                         &
+      dim_cs1, dim_cs2,                                                       &
+      halo_i, halo_j, offx, offy, mype,                                       &
+      n_proc, n_procx, n_procy,                                               &
+      g_rows, g_row_length,                                                   &
+      at_extremity,                                                           &
+      land_pts,                                                               &
+      land_index,                                                             &
+      ntype,npft,                                                             &
+      c_veg_pft,cv_gb,g_leaf_phen_pft,                                        &
+      lit_c_pft,lit_c_mn_gb,g_leaf_day_pft,                                   &
+      lai_phen_pft,g_leaf_dr_out_pft,npp_dr_out_pft,                          &
+      resp_w_dr_out_pft,resp_s_dr_out_gb,frac_disturb,disturb_veg_prev,       &
+      wood_prod_fast_d1, wood_prod_med_d1, wood_prod_slow_d1,                 &
+      frac_surft,lai_pft,canht_pft,cs_pool_gb,                                &
+      STASHwork19                                                             &
+      )
+  END IF
+END IF
+#endif
+        
+    CASE DEFAULT
+      CALL ereport('surf_couple_explicit', 101, 'Unrecognised surface scheme')
+
+  END SELECT
 
 IF (lhook) CALL dr_hook(ModuleName//':'//RoutineName,zhook_out,zhook_handle)
 RETURN

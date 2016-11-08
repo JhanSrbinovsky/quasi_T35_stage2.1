@@ -19,7 +19,7 @@
 !
 ! Purpose:
 !
-! Called from: JULES: surf_couple_
+! Called from: JULES: surf_couple_ pathway
 !
 ! Contact: Jhan.Srbinovsky@csiro.au
 !
@@ -32,33 +32,13 @@ module cable_hyd_main_mod
   
 contains
 
-SUBROUTINE cable_hyd_main( ) 
-
-  !USE UM modules 
-  USE timestep_mod,   ONLY : timestep_number  ! number
+SUBROUTINE cable_hyd_main( mype, timestep_number ) 
   
-  !--- USE CABLE modules 
-  USE cable_decs_mod, ONLY : CABLE_file
-  USE cable_logs_mod, ONLY :                                                   &
-    first_CABLE_call,     & ! LOGICAL var: CABLE wide first call  
-    KBL_progress,         & ! TYPEd details of progress log 
-    cable_logs,           & ! SUBR to set CABLE wide stuff
-    init_nml_prefs        & ! SUBR to init. nml prefs
-  
-  USE cable_progs_mod, ONLY : cable !TYPEd CABLE progs, set in UM IO
-
-  USE cable_common_module, ONLY : knode_gl,        & ! processor number
-                                  ktau_gl,         & ! number
-                                  kwidth_gl          ! width in S 
-  
-  USE cable_write_logs_mod, ONLY : write_progress_log
-
   implicit none
  
-  !--- IN ARGS FROM surf_couple_hydiation() ------------------------------------
-  
-  !--- End IN ARGS FROM surf_couple_hydiation() --------------------------------
-
+  !--- IN ARGS FROM sf_exch_cable, passed from surf_couple_hyd() down ----
+  integer :: mype, timestep_number
+  !--- End IN ARGS  -----------------------------------------------------------
 
   !--- declare local vars ------------------------------------------------------ 
 
@@ -67,25 +47,15 @@ SUBROUTINE cable_hyd_main( )
   
   !--- End header -------------------------------------------------------------
   
-  ktau_gl   = timestep_number
-  
+  if(mype==0) then
+    write (6, *) "CABLE_LSM:Subr: ", subr_name,  "@ timestep: ", timestep_number 
+  endif
+     
   !----------------------------------------------------------------------------
   !--- Organize report writing for CABLE.                         -------------
   !--- Progress log and IN args @ timestep X,Y,Z                  -------------
   !----------------------------------------------------------------------------
   
-  ! get unique "KBL_progress" wherever this is called from 
-  if( first_CABLE_call ) call cable_logs()
-  
-  !jhan: check this bc not always 0
-  ! IF we are interested in logging CALLs to different parts of CABLE 
-  if( knode_gl==0 ) then
-    if( KBL_progress%want ) &
-      call write_progress_log( KBL_progress, ktau_gl, subr_name, cycleno )
-  endif
-
-  !jhan: call checks as required by namelis      
-
   !----------------------------------------------------------------------------
   !----------------------------------------------------------------------------
   

@@ -14,8 +14,8 @@ SUBROUTINE tile_albedo_cable (                                                &
  albobs_sw, albobs_vis, albobs_nir,                                           &
  cosz,frac,lai_in,canht,rgrain,snow_surft,soot,tstar_surft,                   &
  z0_surft,ho2r2_orog,alb_surft,land_albedo,albobs_sc,                         &
- mype, timestep_number, cycleno, row_length, rows,                            &
- fland, surf_down_sw, cosz_gb, soil_alb, land_alb )
+ mype, timestep_number, cycleno, numcycles, row_length, rows,                 &
+ fland, surf_down_sw, soil_alb, land_alb )
 
 USE jules_print_mgr, ONLY :                                                   &
     jules_message,                                                            &
@@ -134,11 +134,11 @@ REAL, INTENT(IN) ::                                                           &
 
 !CABLE_LSM:
 INTEGER :: mype, timestep_number
-integer :: cycleno                      ! ENDGAME cycle number
+integer :: cycleno, numcycles                ! ENDGAME cycle number
 integer :: row_length, rows ! grid
 real :: surf_down_sw(row_length,rows,4) ! 4-band ShortWave forcing
-real :: fland(land_pts)                 ! land fraction 
-real :: soil_alb(land_pts)              ! Snow-free, bare soil albedo: 
+real :: fland(land_field)                 ! land fraction 
+real :: soil_alb(land_field)              ! Snow-free, bare soil albedo: 
 real :: land_alb(row_length,rows)         ! Mean land_albedo
 
 LOGICAL, SAVE :: first_call = .true.
@@ -1276,10 +1276,10 @@ END IF
 !CABLE_LSM:
 if(.NOT.first_call) then
         CALL cable_rad_main( mype, timestep_number,                            & 
-          cycleno, row_length, rows, land_field, ntype,                         &
+          cycleno, numcycles, row_length, rows, land_field, ntype,             &
           frac, fland,                                                    &
           surf_down_sw,                                                        &
-          cosz_gb,                                                              &
+          cosz,                                                              &
           snow_surft,                                                           &
           soil_alb,         &
           land_albedo,      &

@@ -32,8 +32,9 @@ module cable_rad_main_mod
   
 contains
 
-SUBROUTINE cable_rad_main( cycleno, row_length, rows, land_pts, ntiles,        &
-              tile_frac, fland, surf_down_sw, cosine_zenith_angle, snow_tile,             &
+SUBROUTINE cable_rad_main( mype, timestep_number, cycleno, numcycles,          &
+              row_length, rows, land_pts, ntiles,                              &
+              tile_frac, fland, surf_down_sw, cosine_zenith_angle, snow_tile,  &
               soil_alb, land_albedo, alb_surft, land_alb )
           !cable% snow_temp, 
           !cable% snow_avg_rho,                  &
@@ -44,7 +45,7 @@ SUBROUTINE cable_rad_main( cycleno, row_length, rows, land_pts, ntiles,        &
  
   !--- IN ARGS FROM surf_couple_radiation() ------------------------------------
   
-  integer :: cycleno                      ! ENDGAME cycle number
+  integer :: mype, timestep_number, cycleno, numcycles
   integer :: row_length, rows, land_pts, ntiles ! grid
   real :: surf_down_sw(row_length,rows,4) ! 4-band ShortWave forcing
   real :: tile_frac(land_pts,ntiles)      ! surface type fraction 

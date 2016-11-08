@@ -50,7 +50,7 @@ SUBROUTINE surf_couple_radiation(                                             &
   !UM-only args: INTENT(OUT)
   albobs_sc, open_sea_albedo,                                                 &
 !CABLE_LSM:
-  surf_down_sw, tile_frac, fland                                              &      
+  surf_down_sw, fland                                              &      
 #endif
   )
 
@@ -81,6 +81,7 @@ USE theta_field_sizes,        ONLY:                                           &
 
 !CABLE_LSM:
 USE atm_step_local, ONLY : cycleno
+USE dynamics_input_mod, ONLY : numcycles
 USE atm_fields_real_mod, ONLY : land_alb, soil_alb
 USE lsm_switches_mod,        ONLY: lsm_id
 USE um_parcore,              ONLY : mype
@@ -226,7 +227,6 @@ REAL, INTENT(IN)    ::                                                        &
 !CABLE_LSM: 4-band SW required to compute albedo
 REAL, INTENT(IN) ::                                                           &
   surf_down_sw(row_length,rows,4),                                            &
-  tile_frac(land_pts,ntype),                                                 &
   fland(land_pts)
    
 !Misc INTENT(OUT)
@@ -346,8 +346,8 @@ REAL, INTENT(OUT) ::                                                          &
         z0_surft,ho2r2_orog_gb,                                               &
         alb_surft, land_albedo, albobs_sc,                                    &
         !CABLE_LSM:
-        mype, timestep_number, cycleno, row_length, rows,                     &
-        fland, surf_down_sw, cosz_gb, soil_alb, land_alb )
+        mype, timestep_number, cycleno, numcycles, row_length, rows,          &
+        fland, surf_down_sw, soil_alb, land_alb )
 
 
     CASE DEFAULT

@@ -32,12 +32,31 @@ module cable_implicit_main_mod
   
 contains
 
-SUBROUTINE cable_implicit_main( mype, timestep_number ) 
+SUBROUTINE cable_implicit_main(                                                &        
+              mype, timestep_number,cycleno, numcycles,                        & 
+              row_length,rows, land_pts, ntiles, npft, sm_levels,              &
+              ls_rain, ls_snow,                                    &
+              conv_rain, conv_snow!, &
+              !canopy_gb, smcl &
+            )  
   
   implicit none
  
   !--- IN ARGS FROM sf_impl2_cable, passed from surf_couple_implicit() down ----
-  integer :: mype, timestep_number
+  integer :: mype, timestep_number, cycleno, numcycles
+  integer :: row_length,rows, land_pts, ntiles, npft, sm_levels
+!jjhan
+!_rain & _ snow still have  to be defined. 1st decs in atm_step(ls_) &
+!atmos_phys2(conv_) 
+  REAL, DIMENSION(row_length,rows) :: &
+    ls_rain,    &
+    ls_snow,    &
+    conv_rain,    &
+    conv_snow
+
+REAL ::                                                                       &
+ canopy_gb(land_pts), &
+ smcl(land_pts, sm_levels) 
   !--- End IN ARGS  -----------------------------------------------------------
 
   !--- declare local vars ------------------------------------------------------ 
